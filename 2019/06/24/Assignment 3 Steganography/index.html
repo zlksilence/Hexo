@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="Assignment 3: SteganographyIntroductionSteganography refers to hiding information such as text/images/data within another file/message/data with the intent of concealing the existence of the hidden in">
+<meta property="og:type" content="article">
+<meta property="og:title" content="java并发编程实践（三）-锁机制">
+<meta property="og:url" content="http://yoursite.com/2019/06/24/Assignment 3 Steganography/index.html">
+<meta property="og:site_name" content="silence">
+<meta property="og:description" content="Assignment 3: SteganographyIntroductionSteganography refers to hiding information such as text/images/data within another file/message/data with the intent of concealing the existence of the hidden in">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://static.edusercontent.com/files/umhGWvrf2BLnbt07JkWexXQv">
+<meta property="og:image" content="https://static.edusercontent.com/files/MzqCKX0tcwNytFX6U81xDaIs">
+<meta property="og:image" content="https://static.edusercontent.com/files/G2ZRyBfgTu3fVIwAWPVJNgSJ">
+<meta property="og:image" content="https://static.edusercontent.com/files/nptFahhlPgsye67hOWnm7XXO">
+<meta property="og:updated_time" content="2019-06-24T09:13:28.896Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="java并发编程实践（三）-锁机制">
+<meta name="twitter:description" content="Assignment 3: SteganographyIntroductionSteganography refers to hiding information such as text/images/data within another file/message/data with the intent of concealing the existence of the hidden in">
+<meta name="twitter:image" content="https://static.edusercontent.com/files/umhGWvrf2BLnbt07JkWexXQv">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2019/06/24/Assignment 3 Steganography/">
+
+
+
+
+
+  <title>java并发编程实践（三）-锁机制 | silence</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">silence</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/06/24/Assignment 3 Steganography/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="zlksilence">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/uploads/headpiture.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="silence">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">java并发编程实践（三）-锁机制</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-06-24T16:18:55+08:00">
+                2019-06-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="Assignment-3-Steganography"><a href="#Assignment-3-Steganography" class="headerlink" title="Assignment 3: Steganography"></a>Assignment 3: Steganography</h1><h1 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h1><p><a href="https://en.wikipedia.org/wiki/Steganography" target="_blank" rel="noopener">Steganography</a> refers to hiding information such as text/images/data within another file/message/data with the intent of concealing the existence of the hidden information. A common method for this is hiding data within the least significant bits of the bytes representing colours in an image. The LSB can be represented as 0b00000001, 0x01 or 1 and the MSB can be represented as 0b10000000, 0x80 or 128.</p>
+<p>You are to write a program that can be used to hide data from a supplied file in the low bits of a supplied image file. The same program will also be able to check the size of hidden data, extract the data and verify, using a checksum, the integrity of the hidden data in an image.</p>
+<h1 id="Encoding"><a href="#Encoding" class="headerlink" title="Encoding"></a>Encoding</h1><p><img src="https://static.edusercontent.com/files/umhGWvrf2BLnbt07JkWexXQv" alt="img"></p>
+<p>Bitmap files (<code>*.bmp</code>) are a relatively simple file format. The file consists of a header containing metadata about the pixel format and image size and is <code>m</code> bytes long. The pixel data follows in the remaining <code>l</code> bytes, the size of which can be calculated from the information in the header. The basic specification only requires you handle these files and a <code>bitmap</code> module is supplied to assist in getting the length of the header in bytes and the length of the pixel data in bytes.</p>
+<p><img src="https://static.edusercontent.com/files/MzqCKX0tcwNytFX6U81xDaIs" alt="img"></p>
+<p>The program shall only modify the data relating to pixel bytes and shall copy the header information required for the image file format without modification. Concealing a single byte within the pixel data is depicted in the above diagram. The MSB of concealed data shall be placed in lower index pixel bytes and the LSB in higher index pixel bytes. Where multiple bits are concealed per byte of pixel data (as in a following diagram) the more significant bits of concealed data shall be placed in more significant bits of the pixel byte. Where there are insufficient bits of the current byte of concealed data to fill the required number of bits in the pixel byte the most significant bit(s) of the next byte of concealed data shall be utilised.</p>
+<p>The format of the concealed data consists of a 32 bit unsigned integer giving the length of the data payload, the data payload and a 32 bit unsigned integer checksum of the data payload. The data length and checksum parameters are always encoded as 1 concealed bit per byte of pixel data. The concealed data is encoded as the minimum number of concealed bits per byte of pixel data to completely encode the payload. This may require 2, 3 or even 8 bits concealed per byte of pixel data. Where multiple bits are required per byte more significant bits of concealed data are encoded in the more significant bits of the pixel data as shown in a following diagram where concealing 3 bits per byte of pixel data is depicted. Once all the bytes of the data payload have been concealed remaining bits in the current pixel byte shall be set to 0 and remaining pixel bytes (until the last 32 bytes for the checksum) shall be copied unmodified.</p>
+<p><img src="https://static.edusercontent.com/files/G2ZRyBfgTu3fVIwAWPVJNgSJ" alt="img"></p>
+<p>Given <code>o</code> bytes of data to conceal the <em>output</em> image file that has <code>l</code> bytes of pixel data shall have:</p>
+<ol>
+<li><code>m</code> bytes of header data directly copied from the <em>input</em> source image file. </li>
+<li>32 bytes of pixel data with the length of the data payload <code>o</code> concealed 1 bit per byte.</li>
+<li><code>p</code> bytes of modified pixel data<ol>
+<li><code>r</code> bits of concealed data per pixel byte shall be used where,</li>
+<li>r is the minimum number of bits per pixel such that the concealed data can fit within the available pixel values.</li>
+<li>r is an integer value such that the following is true <code>(r - 1) * (l - 64) &lt; (o * 8) &amp;&amp; r * (l - 64) &gt;= (o * 8)</code></li>
+<li>If (<code>r * p) != (o * 8)</code> the ‘concealed’ bits will be append with <code>s</code> ‘0’ bits such that <code>(r * p) == (s + o * 8)</code>.</li>
+</ol>
+</li>
+<li><code>q</code> bytes of unmodified pixel data.</li>
+<li>32 bytes of pixel data with the checksum of the data payload concealed 1 bit per byte.</li>
+</ol>
+<p><img src="https://static.edusercontent.com/files/nptFahhlPgsye67hOWnm7XXO" alt="img"></p>
+<p>Once all the concealed data is encoded the remaining bytes are copied unmodified until the checksum. If at the end of the concealed data there are insufficient bits to fill the last pixel byte (as in the above diagram) the remaining bits shall be set to 0.</p>
+<h1 id="Basic-Specification-75"><a href="#Basic-Specification-75" class="headerlink" title="Basic Specification (75%)"></a>Basic Specification (75%)</h1><p>The program shall comply with the following specification:</p>
+<h2 id="1-Compilation-amp-Code"><a href="#1-Compilation-amp-Code" class="headerlink" title="1. Compilation &amp; Code"></a>1. Compilation &amp; Code</h2><ol>
+<li>The program shall be written in C and compiled with GCC using the C11 standard; the compiled executable shall be named <code>steg</code>. Compilation flags shall include “<code>-Wall -Wextra -Wpedantic -fsanitize=address -std=c11</code>“. Additional flags that do not remove/undo the effects of these flags shall be permitted.</li>
+<li>Compilation shall be through a <code>Makefile</code> that has <code>steg</code> and <code>clean</code> as targets.</li>
+<li>All comments in the source code shall be written in English.</li>
+</ol>
+<h2 id="2-Error-Handling"><a href="#2-Error-Handling" class="headerlink" title="2. Error Handling"></a>2. Error Handling</h2><ol>
+<li>All error messages, which are messages starting with “Error:”, shall be printed to the terminal using <code>stderr</code>.</li>
+<li>Where the specification states “exit immediately with error code n” this is to mean no further text shall be printed to the terminal and the return statement in <code>main</code> shall return <code>n</code>. All allocated memory shall be properly freed.</li>
+<li>Errors shall be responded to in the following order:<ol>
+<li>Left to right for command line options.</li>
+<li>Missing input files before existing output files.</li>
+<li>Payload size relative to image size.</li>
+<li>Checksum verification.</li>
+</ol>
+</li>
+<li>If no errors occur the program shall return an error code of 0.</li>
+</ol>
+<h2 id="3-Command-Line-Options"><a href="#3-Command-Line-Options" class="headerlink" title="3. Command Line Options"></a>3. Command Line Options</h2><ol>
+<li><p>The program will accept 1, 2 or 3 non-option arguments (arguments after and including the first argument that doesn’t start with <code>-</code>). The following points specify the differing behaviour of the program with each number of arguments.</p>
+</li>
+<li><p>Optional arguments may modify the behaviour of the program and shall be given before any non-option arguments.</p>
+</li>
+<li><p>If the program is given zero non-option arguments it shall print <code>Error: No file name provided.\n</code> and exit immediately with error code 7.</p>
+</li>
+<li><p>If the program is given more than three non-option arguments it shall print <code>Error: Too many file names provided.\n</code> and exit immediately with error code 6.</p>
+</li>
+<li><p>If the program is given three non-option arguments it shall treat the first non-option argument as the name of an <em>input</em> source image file, the second non-option argument as the name of an <em>input</em> source data file and the third non-option argument as the name of an <em>output</em> destination image file. It shall then embed the contents of the input source data file in the input source image pixels and output to the destination image file the modified pixel values and unmodified file format/header information.</p>
+</li>
+<li><p>If the program is given two non-option arguments it shall treat the first non-option argument as an <em>input</em> image file with encoded data and the second non-option argument as an <em>output</em> data file. It shall then extract the contents of the input image file to the output data file.</p>
+</li>
+<li><p>If the program is given one non-option argument it shall treat it as an <em>input</em> image file with encoded data and only decode if another option is specified.</p>
+</li>
+<li><p>The program shall accept the optional argument <code>-h</code> which shall cause the program to print the specified help message and immediately exit with error code 1. The help message is:</p>
+<p>Text</p>
+</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">Usage: steg [-vncp] source_image [[data_file] [output_image]]</span><br><span class="line"></span><br><span class="line">Steganographically conceal/extract data from an image.</span><br><span class="line"> </span><br><span class="line">With three arguments will conceal data from data_file within source_image and</span><br><span class="line"> </span><br><span class="line">output to output_image. One and two argument versions inspect (and optionally save)</span><br><span class="line"> </span><br><span class="line">data from an image with concealed data.</span><br><span class="line"></span><br><span class="line">  -c  Print the checksum of the concealed data.</span><br><span class="line"> </span><br><span class="line">  -h  Print this help message.</span><br><span class="line"> </span><br><span class="line">  -n  Print the number of concealed bytes.</span><br><span class="line"></span><br><span class="line">  -p  Print the contents of a concealed image/data file when concealing. Assuming text data.</span><br><span class="line"> </span><br><span class="line">  -v  Verify checksum of an image with concealed data. Invalid if an output image is specified.</span><br></pre></td></tr></table></figure>
+
+
+
+<ol start="9">
+<li><p>The program shall accept the optional argument <code>-n</code> which shall cause the program to print the length of hidden data in bytes, in the format <code>Hidden data length: 45643 bytes.\n</code>.</p>
+</li>
+<li><p>The program shall accept the optional argument <code>-c</code> which shall cause the program to print the checksum of the hidden data as a 32-bit hex number in the format <code>Checksum: 0x0400F50F.\n</code>. When the <em>input</em> image contains hidden data, as signified by a command line containing 1 or 2 non-option arguments, this checksum value shall be read from the stored checksum. When creating an <em>output</em> image containing hidden data the checksum value printed shall be checksum calculated from the <em>input</em> data.</p>
+</li>
+<li><p>The program shall accept the option argument <code>-p</code> which shall cause the program to print the hidden data (treating it as a text file/string) between two lines that each consist of 80 hyphens:</p>
+</li>
+</ol>
+<pre><code>Text
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">--------------------------------------------------------------------------------</span><br><span class="line">This is the contents of a text file. The first line was very long and did not end at 80 characters.</span><br><span class="line"></span><br><span class="line">This file ended with a new line character and means there is a blank line before the hyphens.</span><br><span class="line"></span><br><span class="line">--------------------------------------------------------------------------------</span><br></pre></td></tr></table></figure></code></pre><ol start="12">
+<li><p>The program shall accept the optional argument <code>-v</code> which shall cause the program to verify the checksum with the data. The <code>-v</code> optional argument shall be valid only with one and two non-option argument invocations of the program. If the optional argument <code>-v</code>Iis used with the three non-option argument invocation of the program the program shall print <code>Error: -v invalid when concealing data.\n</code> and exit immediately with error code 11. If the calculated checksum differs from the stored checksum the program shall print <code>Error: Checksum mismatch.\n</code> and exit immediately with error code 12. If the calculated checksum matches the stored checksum the program shall print <code>Checksums match.\n</code>. </p>
+</li>
+<li><p>If the program finds an optional argument that it is not known it shall print <code>Error: Unknown option -%s.\n</code> and immediately exit with error code 8.</p>
+</li>
+<li><p>Output/effects from processing optional arguments shall occur after any output files have been written and will occur in the order <code>-p</code>, <code>-n</code>, <code>-c</code>, <code>-v</code>.</p>
+</li>
+</ol>
+<h2 id="4-File-Handling"><a href="#4-File-Handling" class="headerlink" title="4. File Handling"></a>4. File Handling</h2><ol>
+<li>If a nominated <em>input</em> file does not exist the program shall print an error message <code>Error: Input file %s was not found.\n</code> and exit immediately with error code 2. The token  <code>%s</code> shall be replaced with the name of the file that was nominated.</li>
+<li>If a nominated <em>output</em> file exists the program shall inquire of the user <code>Output file %s already exists. Overwrite (y/n)?</code>  If an affirmative answer (<code>y, yes</code> - case insensitive) is received, the program shall continue and overwrite the file. If the answer is negative (<code>n, no</code> - case insensitive) the program shall emit no further messages and exit immediately with error code 3. If any other value is received the program shall ask the question again.</li>
+<li>If the data to be encoded cannot fit within the source image pixel values (see encoding details above) the program shall print <code>Error: Input data too large to hide within source image.\n</code> and exit immediately with error code 5.</li>
+<li>If when attempting to decode an <em>input</em> image file the decoded data size is too large to be concealed within the image file the program shall print an error message <code>Error: Image file too small to conceal %i bytes of data.\n</code> and exit immediately with error code 9.</li>
+</ol>
+<h2 id="5-Checksum"><a href="#5-Checksum" class="headerlink" title="5. Checksum"></a>5. Checksum</h2><p>A <a href="https://en.wikipedia.org/wiki/Checksum" target="_blank" rel="noopener">checksum</a> is a method to check if data has been modified or changed. It is a function of the data and is generally sensitive to changes of a single bit. As we are storing data within an image we need a way to verify that it has not been corrupted in an image editing program. To this end we have devised a relatively simple checksum to use.</p>
+<ol>
+<li>The data payload shall be broken into 16-bit unsigned short integers using <a href="https://en.wikipedia.org/wiki/Endianness" target="_blank" rel="noopener">little endian</a> ordering.</li>
+<li>Each short shall be squared (multiplied by itself) and the result stored in an unsigned integer (32-bit).</li>
+<li>The result of the squaring operation shall be successively XOR’d (<code>^</code> operator) to get the final checksum.</li>
+<li>If the data payload has an odd number of bytes an additional zero byte shall be appended onto the end for the purposes of calculating the checksum but shall not be stored/concealed within the pixel bytes.</li>
+</ol>
+<h1 id="Code-Quality-25"><a href="#Code-Quality-25" class="headerlink" title="Code Quality (25%)"></a>Code Quality (25%)</h1><p>A quarter of your mark will be based on code quality. This includes consistent and clear formatting, sensible variable and function names (self-documenting), succinct, clear and appropriate comments as well as cohesive module design, correct usage of headers and control structures (switch, if-else if-else, while, for).</p>
+<h1 id="Extension-Bonus-10"><a href="#Extension-Bonus-10" class="headerlink" title="Extension (Bonus 10%)"></a>Extension (Bonus 10%)</h1><p>We are adding a <strong>difficult</strong> bonus extension to this project. It is not expected that many will be able to complete this but is posed as a challenge. Instead of handling only bitmaps your program shall also accept png image files. Png is another image format that has lossless compression. An open source library is available to assist with parsing and accessing the data (<code>libpng</code>). This extension will involve recognising the image format from the extension of the filename (png vs bmp). We won’t ask you to convert between formats (input image format will match the output format).</p>
+<p>No assistance will be provided in the use of <code>libpng</code> so that you will have to rely on reading the documentation which is available online at the libpng <a href="http://www.libpng.org/pub/png/libpng.html" target="_blank" rel="noopener">website</a>.</p>
+<h1 id="Constraints"><a href="#Constraints" class="headerlink" title="Constraints"></a>Constraints</h1><ol>
+<li>All images provided will be valid bitmaps and the supplied bitmap files <code>bitmap.h</code> and <code>bitmap.o</code> will be able to give the lengths of header and pixel data reliably.</li>
+<li>Although <code>getopt</code> can handle splitting <code>-pnc</code> to <code>-p -n -c</code> we will not be testing this. We will test:<ol>
+<li>Other optional arguments like <code>-x</code></li>
+<li>Too many/too few non-option arguments.</li>
+</ol>
+</li>
+</ol>
+<h1 id="Hints"><a href="#Hints" class="headerlink" title="Hints"></a>Hints</h1><ol>
+<li><p>Command line parsing without <code>getopt</code> will be difficult.</p>
+</li>
+<li><p>Encoding a single bit per byte is significantly easier than the general case.</p>
+</li>
+<li><p>Two bits per byte is still significantly easier than the general case as well.</p>
+</li>
+<li><p><code>fopen</code> has enhanced handling for cases when files exist in C11.</p>
+</li>
+<li><p>When creating your <code>Makefile</code> be careful not to delete the supplied <code>bitmap.o</code>. If you do another one copy can be obtained here.</p>
+<p><a href="https://static.edusercontent.com/files/hvsCDqP69yWYTvOp4snB7NeY" target="_blank" rel="noopener">bitmap.o</a></p>
+</li>
+<li><p>Be careful you encode/decode bits in the specified order. We are checking for exact matches in the encoded images.</p>
+</li>
+<li><p>You can manually inspect the contents (byte by byte) of files using the <code>xxd</code> program. For example, <code>xxd -l len -b filename</code> will display ‘len’ bytes of the file named ‘filename’, in binary format.</p>
+</li>
+</ol>
+<h1 id="Execution"><a href="#Execution" class="headerlink" title="Execution"></a>Execution</h1><ol>
+<li>Your submission must include a <code>Makefile</code> that you shall provide. You can use a previously supplied <code>Makefile</code> as a template and adapt it to this assignment or write your own less generic <code>Makefile</code> based on the lecture slides.</li>
+<li>The executable that is created shall be called <code>steg</code>. It shall be created in the root directory of your submission.</li>
+<li>Your code shall be compiled by executing the command <code>make clean &amp;&amp; make</code> in the root directory of your submission. This shall delete all intermediate object files (except <code>bitmap.o</code>) and build the <code>steg</code> program.</li>
+</ol>
+<h1 id="Libraries"><a href="#Libraries" class="headerlink" title="Libraries"></a>Libraries</h1><p>You may use any function in the C11 standard library. You additionally may use the <code>getopt</code> function from the GNU C Library (found in header <code>getopt.h</code>). We also supply files  <code>bitmap.o</code> and <code>bitmap.h</code> that enable parsing of bitmaps to get the length of the bitmap header and size of pixel data. If attempting the png extension you may additionally utilise <code>libpng</code> which is already available within edstem.</p>
+<p>The following library functions are likely to be useful:</p>
+<p>Header <strong>&lt;stdio.h&gt;</strong> has file input/output functions: <strong>fread(), fwrite(), fopen(), fseek(), fclose()</strong><br>Header <strong>&lt;getopt.h&gt;</strong> has argument parsing function: <strong>getopt()</strong><br>Header <strong>&lt;assert.h&gt;</strong> has the bug-catching macro: <strong>assert()</strong></p>
+<h1 id="Expectations"><a href="#Expectations" class="headerlink" title="Expectations"></a>Expectations</h1><ul>
+<li>This is an individual assignment, not group work. Although you can consult others about the use of specific functions, the code that you submit must be solely your own work: The result of your thought processes, design decisions, implementation and testing.</li>
+<li>We expect you to follow good design practices, including the use of functions to reduce complexity and code repetition.</li>
+<li>You will make completing the assignment significantly easier if you start work on it early and adopt an incremental approach to implementation and testing. In other words, <ul>
+<li>Do not code the entire program and then submit it for testing. Instead, code a small subsection and test it, then incrementally extend this subsection and re-test.</li>
+<li>Do not submit your first code at 10pm on the night that the assignment is due and expect everything to work…</li>
+</ul>
+</li>
+<li>Avoid submitting just before it is due - clock synchronisation or build times may shift your final submission to microseconds after the cutoff 11:59:00PM and result in late penalties.</li>
+<li>Elements of the project are intended to be challenging. The extension in particular is designed to challenge the most skilled amongst you.</li>
+</ul>
+<h1 id="Academic-Honesty"><a href="#Academic-Honesty" class="headerlink" title="Academic Honesty"></a>Academic Honesty</h1><p>While the University is aware that the vast majority of students and staff act ethically and honestly, it is opposed to and will not tolerate academic dishonesty or plagiarism and will treat all allegations of dishonesty seriously.</p>
+<p>Further information on academic honesty, academic dishonesty, and the resources available to all students can be found on the academic integrity pages on the current students website:</p>
+<p><a href="https://sydney.edu.au/students/academic-integrity.html" target="_blank" rel="noopener">https://sydney.edu.au/students/academic-integrity.html</a>. </p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/06/24/hello-world/" rel="next" title="first 测试">
+                <i class="fa fa-chevron-left"></i> first 测试
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/06/24/hadoop 安装指南/" rel="prev" title="java并发编程实践（三）-锁机制">
+                java并发编程实践（三）-锁机制 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/uploads/headpiture.jpg" alt="zlksilence">
+            
+              <p class="site-author-name" itemprop="name">zlksilence</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">20</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Assignment-3-Steganography"><span class="nav-number">1.</span> <span class="nav-text">Assignment 3: Steganography</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Introduction"><span class="nav-number">2.</span> <span class="nav-text">Introduction</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Encoding"><span class="nav-number">3.</span> <span class="nav-text">Encoding</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Basic-Specification-75"><span class="nav-number">4.</span> <span class="nav-text">Basic Specification (75%)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-Compilation-amp-Code"><span class="nav-number">4.1.</span> <span class="nav-text">1. Compilation &amp; Code</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-Error-Handling"><span class="nav-number">4.2.</span> <span class="nav-text">2. Error Handling</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-Command-Line-Options"><span class="nav-number">4.3.</span> <span class="nav-text">3. Command Line Options</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-File-Handling"><span class="nav-number">4.4.</span> <span class="nav-text">4. File Handling</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-Checksum"><span class="nav-number">4.5.</span> <span class="nav-text">5. Checksum</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Code-Quality-25"><span class="nav-number">5.</span> <span class="nav-text">Code Quality (25%)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Extension-Bonus-10"><span class="nav-number">6.</span> <span class="nav-text">Extension (Bonus 10%)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Constraints"><span class="nav-number">7.</span> <span class="nav-text">Constraints</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Hints"><span class="nav-number">8.</span> <span class="nav-text">Hints</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Execution"><span class="nav-number">9.</span> <span class="nav-text">Execution</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Libraries"><span class="nav-number">10.</span> <span class="nav-text">Libraries</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Expectations"><span class="nav-number">11.</span> <span class="nav-text">Expectations</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Academic-Honesty"><span class="nav-number">12.</span> <span class="nav-text">Academic Honesty</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zlksilence</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
