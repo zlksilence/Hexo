@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.7.0">
+
+<link rel="stylesheet" href="/css/main.css?v=7.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.2.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.2.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.2.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.2.0" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '7.2.0',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="java监视器 在 Java 中，每个对象都会有一个 monitor 对象，这个对象其实就是 Java 对象的锁，通常会被称为“内置锁”或“对象锁”   在java虚拟机中，每个对象和类在逻辑上都是和一个监视器相关联的。对于对象来说，相关联的监视器保护对象的实例变量。 对于类来说，监视器保护类的类变量。 （如果一个对象没有实例变量，或者一个类没有变量，相关联的监视器就什么也不监视。）为了实现监视器">
+<meta name="keywords" content="Java,并发,锁">
+<meta property="og:type" content="article">
+<meta property="og:title" content="java并发编程实践（三）-锁机制">
+<meta property="og:url" content="http://yoursite.com/2019/06/24/java并发编程实践（三）-锁机制/index.html">
+<meta property="og:site_name" content="silence">
+<meta property="og:description" content="java监视器 在 Java 中，每个对象都会有一个 monitor 对象，这个对象其实就是 Java 对象的锁，通常会被称为“内置锁”或“对象锁”   在java虚拟机中，每个对象和类在逻辑上都是和一个监视器相关联的。对于对象来说，相关联的监视器保护对象的实例变量。 对于类来说，监视器保护类的类变量。 （如果一个对象没有实例变量，或者一个类没有变量，相关联的监视器就什么也不监视。）为了实现监视器">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://yoursite.com/imag%5Cjava%5CCH.png">
+<meta property="og:image" content="http://yoursite.com/imag%5Cjava%5C8100269-d4c18010361dc4e3.png">
+<meta property="og:updated_time" content="2019-07-09T13:36:30.063Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="java并发编程实践（三）-锁机制">
+<meta name="twitter:description" content="java监视器 在 Java 中，每个对象都会有一个 monitor 对象，这个对象其实就是 Java 对象的锁，通常会被称为“内置锁”或“对象锁”   在java虚拟机中，每个对象和类在逻辑上都是和一个监视器相关联的。对于对象来说，相关联的监视器保护对象的实例变量。 对于类来说，监视器保护类的类变量。 （如果一个对象没有实例变量，或者一个类没有变量，相关联的监视器就什么也不监视。）为了实现监视器">
+<meta name="twitter:image" content="http://yoursite.com/imag%5Cjava%5CCH.png">
+
+
+
+
+
+  
+  
+  <link rel="canonical" href="http://yoursite.com/2019/06/24/java并发编程实践（三）-锁机制/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>java并发编程实践（三）-锁机制 | silence</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">silence</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/06/24/java并发编程实践（三）-锁机制/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="zlksilence">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/uploads/headpiture.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="silence">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">java并发编程实践（三）-锁机制
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+
+          
+          
+          
+
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-06-24 16:20:30" itemprop="dateCreated datePublished" datetime="2019-06-24T16:20:30+08:00">2019-06-24</time>
+            </span>
+          
+
+          
+            
+
+            
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-07-09 21:36:30" itemprop="dateModified" datetime="2019-07-09T21:36:30+08:00">2019-07-09</time>
+              </span>
+            
+          
+
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/学习/" itemprop="url" rel="index"><span itemprop="name">学习</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          <br>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="java监视器"><a href="#java监视器" class="headerlink" title="java监视器"></a>java监视器</h2><ul>
+<li><p>在 Java 中，每个对象都会有一个 monitor 对象，这个对象其实就是 Java 对象的锁，通常会被称为“内置锁”或“对象锁” </p>
+</li>
+<li><p>在java虚拟机中，每个对象和类在逻辑上都是和一个监视器相关联的。<br>对于对象来说，相关联的监视器保护对象的实例变量。</p>
+<p>对于类来说，监视器保护类的类变量。</p>
+<p>（如果一个对象没有实例变量，或者一个类没有变量，相关联的监视器就什么也不监视。）<br>为了实现监视器的排他性监视能力，java虚拟机为每一个对象和类都关联一个锁。代表任何时候只允许一个线程拥有的特权。线程访问实例变量或者类变量不需锁。</p>
+<p>但是如果线程获取了锁，那么在它释放这个锁之前，就没有其他线程可以获取同样数据的锁了。（锁住一个对象就是获取对象相关联的监视器）</p>
+<p>类锁实际上用对象锁来实现。当虚拟机装载一个class文件的时候，它就会创建一个java.lang.Class类的实例。当锁住一个对象的时候，实际上锁住的是那个类的Class对象。</p>
+</li>
+</ul>
+<h2 id="synchronized"><a href="#synchronized" class="headerlink" title="synchronized"></a>synchronized</h2><ul>
+<li><p>synchronized 是 Java 中的关键字，是利用锁的机制来实现同步的。<br>锁机制有如下两种特性：<br>互斥性：即在同一时间只允许一个线程持有某个对象锁，通过这种特性来实现多线程中的协调机制，这样在同一时间只有一个线程对需同步的代码块(复合操作)进行访问。互斥性我们也往往称为操作的原子性。<br>可见性：必须确保在锁被释放之前，对共享变量所做的修改，对于随后获得该锁的另一个线程是可见的（即在获得锁时应获得最新共享变量的值），否则另一个线程可能是在本地缓存的某个副本上继续操作从而引起不一致。</p>
+</li>
+<li><p>用法：</p>
+<p>用于对象方法：synchronized  void fun(){}  对象锁</p>
+<p>用于静态方法 :synchronized  static void fun(){} 类锁</p>
+<p>用于代码段:synchronized （object） {}  对象锁</p>
+</li>
+<li><p>synchronized  即是对 对象 或 类 的监视器将代码锁定，<strong>锁的持有者是“线程”，而不是调用者</strong></p>
+</li>
+<li><p><strong>在Java中，synchronized不是可中断锁，而Lock是可中断锁。</strong> </p>
+</li>
+<li><p>java通过monitorenter和monitorex等java底层实现加锁，操作系统级别是利用Mutex Lock 来实现</p>
+</li>
+<li><p>java6之后增加了对 synchronized 的优化，增加：锁粗化（Lock Coarsening）、锁消除（Lock Elimination）、轻量级锁（Lightweight Locking）、偏向锁（Biased Locking）、适应性自旋（Adaptive Spinning）等技术来减少锁操作的开销。 </p>
+</li>
+<li><p>synchronized 是可重入的</p>
+</li>
+<li><p><strong>synchronized  保证可见性与原子性 但不保证指令重排</strong></p>
+</li>
+<li><p>由于等待一个锁定线程只有在获得这把锁之后，才能恢复运行，所以让持有锁的线程在不需要锁的时候及时释放锁是很重要的。在以下情况下，持有锁的线程会释放锁：</p>
+<ol>
+<li><p>执行完同步代码块。</p>
+</li>
+<li><p>在执行同步代码块的过程中，遇到异常而导致线程终止。</p>
+</li>
+<li><p>在执行同步代码块的过程中，执行了锁所属对象的wait()方法，这个线程会释放锁，进行对象的等待池。</p>
+</li>
+</ol>
+</li>
+</ul>
+<p>除了以上情况外，只要持有锁的此案吃还没有执行完同步代码块，就不会释放锁。因此在以下情况下，线程不会释放锁：</p>
+<ol start="4">
+<li><p>在执行同步代码块的过程中，执行了Thread.sleep()方法，当前线程放弃CPU，开始睡眠，在睡眠中不会释放锁。</p>
+</li>
+<li><p>在执行同步代码块的过程中，执行了Thread.yield()方法，当前线程放弃CPU，但不会释放锁。</p>
+</li>
+<li><p>在执行同步代码块的过程中，其他线程执行了当前对象的suspend()方法，当前线程被暂停，但不会释放锁。但Thread类的suspend()方法已经被废弃。</p>
+<h2 id="volatile"><a href="#volatile" class="headerlink" title="volatile"></a>volatile</h2></li>
+</ol>
+<ul>
+<li>volatile 关键字的作用<br><strong>保证内存的可见性</strong><br><strong>防止指令重排</strong><br><strong>注意：volatile 并不保证原子性</strong><br>内存可见性<br>volatile保证可见性的原理是在每次访问变量时都会进行一次刷新，因此每次访问都是主内存中最新的版本。<br>所以volatile关键字的作用之一就是保证变量修改的实时可见性。<br>当且仅当满足以下所有条件时，才应该使用volatile变量（常用于标志变量）<br><strong>对变量的写入操作不依赖变量的当前值，或者你能确保只有单个线程更新变量的值。</strong><br><strong>该变量没有包含在具有其他变量的不变式中。</strong><br>volatile使用建议<br><strong>在两个或者更多的线程需要访问的成员变量上使用volatile。当要访问的变量已在synchronized代码块中，或者为常量时，没必要使用volatile。</strong><br>由于使用volatile屏蔽掉了JVM中必要的代码优化，所以在效率上比较低，因此一定在必要时才使用此关键<br>字。<br>volatile和synchronized区别<br>volatile不会进行加锁操作：<br>volatile变量是一种稍弱的同步机制在访问volatile变量时不会执行加锁操作，因此也就不会使执行线程阻<br>塞，因此volatile变量是一种比synchronized关键字更轻量级的同步机制。<br> volatile 变量作用类似于同步变量读写操作：<br>从内存可见性的角度看，写入volatile变量相当于退出同步代码块，而读取volatile变量相当于进入同步代码<br>块。<br>volatile 不如 synchronized安全：<br>在代码中如果过度依赖volatile变量来控制状态的可见性，通常会比使用锁的代码更脆弱，也更难以理解。仅<br>当volatile变量能简化代码的实现以及对同步策略的验证时，才应该使用它。一般来说，用同步机制会更安全<br>些。<br>volatile 无法同时保证内存可见性和原则性：<br>加锁机制（即同步机制）既可以确保可见性又可以确保原子性，而volatile变量只能确保可见性，原因是声明<br>为volatile的简单变量如果当前值与该变量以前的值相关，那么volatile关键字不起作用，也就是说如下的表<br>达式都不是原子操作：“count++”、“count = count+1”。</li>
+<li>使用条件（都需要保证操作的原子性）：<ul>
+<li>　　1）对变量的写操作不依赖于当前值 </li>
+<li>　 2）该变量没有包含在具有其他变量的不变式中 </li>
+</ul>
+</li>
+</ul>
+<h2 id="显示锁lock"><a href="#显示锁lock" class="headerlink" title="显示锁lock"></a>显示锁lock</h2><ul>
+<li><p>非java内置，Lock提供一个无条件的、可轮训的、定时的、可中断的锁获取操作。可通过此类实现同步访问</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Lock</span> </span>&#123;</span><br><span class="line"> 	<span class="function"><span class="keyword">void</span> <span class="title">lock</span><span class="params">()</span></span>;</span><br><span class="line">     <span class="function"><span class="keyword">void</span> <span class="title">lockInterruptibly</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException</span>;</span><br><span class="line">     <span class="function"><span class="keyword">boolean</span> <span class="title">tryLock</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">tryLock</span><span class="params">(<span class="keyword">long</span> time, TimeUnit unit)</span> <span class="keyword">throws</span> InterruptedException</span>;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">unlock</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function">Condition <span class="title">newCondition</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Reentrantlock 是Lock的一个实现。包含 可定时锁、可中断锁、公平锁。</p>
+</li>
+<li><p>AQS (AbstractQueuedSynchronizer) 同步器，主要是实现Reentrantlock及其他锁的底层重要同步器。</p>
+<p>​    它维护了一个volatile int state（代表共享资源）和一个FIFO线程等待队列（多线程争用资源被阻塞时会进入此队列）。这里volatile是核心关键词，具体volatile的语义，在此不述。state的访问方式有三种:getState()、setState()、compareAndSetState()。</p>
+<p>　　AQS定义两种资源共享方式：Exclusive（独占，只有一个线程能执行，如ReentrantLock）和Share（共享，多个线程可同时执行，如Semaphore/CountDownLatch）。</p>
+<p>​    不同的自定义同步器争用共享资源的方式也不同。自定义同步器在实现时只需要实现共享资源state的获取与释放方式即可.</p>
+<p><img src="/imag%5Cjava%5CCH.png" alt></p>
+<p>独占锁acquire()方法的执行流程图：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">st=&gt;start: acquire入口</span><br><span class="line">e=&gt;end: 结束</span><br><span class="line">tryAcquire=&gt;condition: 获取同步状态</span><br><span class="line">addWaiter=&gt;operation: 新增节点并加入队列</span><br><span class="line">preIsHead=&gt;condition: 前驱节点是Head</span><br><span class="line">tryAcquire2=&gt;condition: 获取同步状态</span><br><span class="line">setHead=&gt;operation: 设置head节点为当前node</span><br><span class="line">wait=&gt;operation: 线程进入等待状态（阻塞）</span><br><span class="line">waitup=&gt;operation: 线程被唤醒</span><br><span class="line"></span><br><span class="line">st-&gt;tryAcquire</span><br><span class="line">tryAcquire(no)-&gt;addWaiter-&gt;preIsHead</span><br><span class="line">preIsHead(yes)-&gt;tryAcquire2</span><br><span class="line">preIsHead(no)-&gt;wait</span><br><span class="line">tryAcquire2(yes)-&gt;setHead(left)-&gt;e</span><br><span class="line">tryAcquire2(no)-&gt;wait(right)-&gt;waitup(right)-&gt;preIsHead</span><br><span class="line">tryAcquire(yes)-&gt;e</span><br></pre></td></tr></table></figure>
+
+<p>​    release()操作将唤醒此节点的后节点，因此此AQS是FIFO队列。</p>
+<p>​    以ReentrantLock为例(重写AQS的tryAcquire()等保护类型的方法)，state初始化为0，表示未锁定状态。A线程lock()时，会调用tryAcquire()独占该锁并将state+1。此后，其他线程再tryAcquire()时就会失败，直到A线程unlock()到state=0（即释放锁）为止，其它线程才有机会获取该锁。当然，释放锁之前，A线程自己是可以重复获取此锁的（state会累加），这就是可重入的概念。但要注意，获取多少次就要释放多么次，这样才能保证state是能回到零态的。</p>
+</li>
+</ul>
+<h2 id="wait-和notify"><a href="#wait-和notify" class="headerlink" title="wait()和notify()"></a>wait()和notify()</h2><ul>
+<li><p>java thread有五种状态类型<br>新建状态（New）：新创建了一个线程对象。<br>就绪状态（Runnable）：线程对象创建后，其他线程调用了该对象的start()方法。该状态的线程位于可运行线程池中，变得可运行，等待获取CPU的使用权。<br>运行状态（Running）：就绪状态的线程获取了CPU，执行程序代码。<br>阻塞状态（Blocked）：塞状态是线程因为某种原因放弃CPU使用权，暂时停止运行。直到线程进入就绪状态，才有机会转到运行状态。<br>死亡状态（Dead）：线程执行完了或者因异常退出了run()方法，该线程结束生命周期。<br>当我们调用线程类的sleep()、suspend()、yield()、wait()等方法时会导致线程进入阻塞状态。</p>
+<p>   <strong>wait(): 调用任何对象的wait()方法会让当前线程进入等待，直到另一个线程调用同一个对象的    notify()或notifyAll()方法。</strong><br>notify():唤醒因调用这个对象wait()方法而阻塞的线程。</p>
+</li>
+<li><p><code>sleep()、suspend()、yield ()</code>等方法都隶属于 Thread 类，但<code>wait()/notify()</code>这一对却直接隶属于Object 类，也就是说，所有对象都拥有这一对方法。 </p>
+</li>
+<li><p>必须在 <code>synchronized</code>方法或块中调用 </p>
+</li>
+<li><p>使用 wait() 和notify()进行线程间通信</p>
+</li>
+</ul>
+<h2 id="Threadlocal"><a href="#Threadlocal" class="headerlink" title="Threadlocal"></a>Threadlocal</h2><p>​    ThreadLocal 维护线程的局部变量，为每个线程提供一个可访问的副本。个线程变量之间可独立读写，没有联系和冲突。实现如下：</p>
+<p>​    <img src="/imag%5Cjava%5C8100269-d4c18010361dc4e3.png" alt></p>
+<p>​    Thread内部有一个 ThreadLocal.ThreadLocalMap 类型的Map，Map以 Threadlocal实例为key，value为变量值。线程内使用ThreadLocal获取本线程的副本变量时，实际是获取存储在Thread类里面的Map，此Map中以 此ThreadLocal为key的value值。ThreadLocal 与 key 是<strong>弱引用</strong>的关系，所以当ThreadLocal实例置null后，key也将在下次被 gc掉，但<strong>value不会被gc掉。这种情况可能会出现内存泄漏</strong>，java为最小化这种影响，在ThreadLocal的get、set的时候都会清除Map里所有key为null的value。</p>
+<p>​    线程泄漏: 正常情况下,当线程对象被gc掉后,map中的value也会被gc 。 但当 使用线程池时，线程结束并不会被销毁，会再次使用，这时候容易出现内存泄漏。</p>
+<h2 id="CountDownLatch"><a href="#CountDownLatch" class="headerlink" title="CountDownLatch"></a>CountDownLatch</h2><h2 id="死锁"><a href="#死锁" class="headerlink" title="死锁"></a>死锁</h2><h3 id="常见类型"><a href="#常见类型" class="headerlink" title="常见类型"></a>常见类型</h3><ul>
+<li>锁顺序死锁</li>
+<li>动态的锁顺序死锁</li>
+<li>协作对象间的死锁</li>
+<li>资源死锁</li>
+</ul>
+<h3 id="避免和诊断"><a href="#避免和诊断" class="headerlink" title="避免和诊断"></a>避免和诊断</h3><ul>
+<li><p>确保锁顺序一致</p>
+</li>
+<li><p>开放调用</p>
+<p>即<strong>调用某个外部方法时，不要持有锁。</strong></p>
+</li>
+<li><p>尝试定时的锁</p>
+</li>
+<li><p>通过线程转储分析</p>
+</li>
+</ul>
+<h3 id="其它"><a href="#其它" class="headerlink" title="其它"></a>其它</h3><ul>
+<li>饥饿</li>
+<li>活锁</li>
+<li>弱响应</li>
+</ul>
+<h2 id="java存储模型"><a href="#java存储模型" class="headerlink" title="java存储模型"></a>java存储模型</h2><h2 id="比较并交换（Compare-and-swap-CAS）"><a href="#比较并交换（Compare-and-swap-CAS）" class="headerlink" title="比较并交换（Compare and swap, CAS）"></a>比较并交换（Compare and swap, CAS）</h2><p>​    现代处理器为并行处理提供的一个优化指令，是原子操作的一种，可用于在多线程编程中实现不被打断的数据交换操作，从而避免多线程同时改写某一数据时由于执行顺序不确定性以及中断的不可预知性产生的数据不一致问题。 该操作通过将内存中的值与指定数据进行比较，当数值一样时将内存中的数据替换为新的值。其实CPU级别提供的一个原子指令，不用加锁，效率更高。</p>
+<p>​    java中 <strong>sun.misc.Unsafe</strong> 实现了此方法，此类也在JUC（java.util.current）中如actomic类 大量使用，但官方不建议用户使用 sun.misc.Unsafe。因为 sun.misc.Unsafe 提供了可随意查看和修改JVM运行时的数据结构。</p>
+<p>​    java代码表示：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="keyword">synchronized</span> <span class="title">compareAndSwap</span><span class="params">(<span class="keyword">int</span> expectedValue ,<span class="keyword">int</span> newValue)</span></span>&#123;</span><br><span class="line">	<span class="keyword">int</span> oldValue = values;</span><br><span class="line">	<span class="keyword">if</span>(oldValue = expectValue)&#123;</span><br><span class="line">		value = newValue;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> oldValue;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="JVM对内部锁的优化"><a href="#JVM对内部锁的优化" class="headerlink" title="JVM对内部锁的优化"></a>JVM对内部锁的优化</h2><p>​    JDK1.6以后，出现了各种锁优化技术，如轻量级锁、偏向锁、适应性锁、锁粗化、锁消除等</p>
+<h3 id="对象头"><a href="#对象头" class="headerlink" title="对象头"></a>对象头</h3><p>​    分为两部分：1. Mark Word：存储对象自身的运行时数据，如：Hash Code，GC 分代年龄、锁信息。这部分数据在32位和64位的 JVM 中分别为 32bit 和 64bit；2. 存储指向方法区对象类型数据的指针，如果是数组对象的话，额外会存储数组的长度。</p>
+<h3 id="偏向锁"><a href="#偏向锁" class="headerlink" title="偏向锁"></a>偏向锁</h3><p><strong>核心思想：</strong>当线程请求到锁对象后，将锁对象的状态标志位改为 01，即偏向模式。然后使用 CAS 操作将线程的 ID 记录在锁对象的 Mark Word 中。以后该线程可以直接进入同步块，连CAS操作都不需要。但是，一旦有第二条线程需要竞争锁，那么偏向模式立即结束，进入轻量级锁的状态。</p>
+<p><strong>与轻量级锁的区别：</strong>轻量级锁是在无竞争的情况下使用CAS操作来代替互斥量的使用，从而实现同步；而偏向锁是在无竞争的情况下完全取消同步。</p>
+<p><strong>作用：</strong>偏向锁是为了消除无竞争情况下的同步原语，进一步提升程序性能。</p>
+<p><strong>优点：</strong>偏向锁可以提高有同步但没有竞争的程序性能。但是如果锁对象时常被多条线程竞争，那偏向锁就是多余的。</p>
+<h3 id="轻量级锁"><a href="#轻量级锁" class="headerlink" title="轻量级锁"></a>轻量级锁</h3><p>如果偏向锁失败，JVM 并不会立即挂起线程。他还会使用一种称为轻量级锁的优化手段。</p>
+<p><strong>核心思想：</strong>轻量级锁将对象头部作为指针，指向持有锁的线程堆栈的内部，来判断一个线程是否持有对象锁。如果线程获得轻量级锁成功，则可以顺利进入临界区，如果获取轻量级锁失败，则表示其它线程先抢到了锁，那么线程的锁请求就会膨胀为重量级锁。</p>
+<p><strong>前提：</strong>轻量级锁比重量级锁性能更高的前提是，在轻量级锁被占用的整个同步周期内，不存在其他线程的竞争。若在该过程中一旦有其他线程竞争，那么就会膨胀成重量级锁，从而除了使用互斥量以外，还额外发生了CAS操作，因此更慢！</p>
+<p><strong>轻量级锁与重量级锁的比较：</strong></p>
+<ul>
+<li>重量级锁是一种悲观锁，它认为总是有多条线程要竞争锁，所以它每次处理共享数据时，不管当前系统中是否真的有线程在竞争锁，它都会使用互斥同步来保证线程的安全；</li>
+<li>而轻量级锁是一种乐观锁，它认为锁存在竞争的概率比较小，所以它不使用互斥同步，而是使用CAS操作来获得锁，这样能减少互斥同步所使用的『互斥量』带来的性能开销。</li>
+</ul>
+<h3 id="自旋锁"><a href="#自旋锁" class="headerlink" title="自旋锁"></a>自旋锁</h3><p>锁膨胀后，JVM 为避免线程真正在操作系统层面挂起，JVM 做了最后的努力 — 自旋锁。由于当前线程无法获取锁，但什么时候获取锁是一个未知数。</p>
+<p>因此，系统会进行一次赌注：它会假设在不久的将来，线程可以得到这把锁，JVM 让当前线程做几个空循环（这是自旋的含义）。在经过若干次循环后，如果可以得到锁，那么久顺利进入临界区。如果还不能获得锁，才会真正将线程在系统层面挂起。</p>
+<p><strong>优点：</strong>由于自旋等待锁的过程线程并不会引起上下文切换，因此比较高效；</p>
+<p><strong>缺点：</strong>自旋等待过程线程一直占用 CPU 执行权但不处理任何任务，因此若该过程过长，那就会造成 CPU 资源的浪费。</p>
+<p><strong>自适应自旋：</strong>自适应自旋可以根据以往自旋等待时间的经验，计算出一个较为合理的本次自旋等待时间。</p>
+<h3 id="锁消除"><a href="#锁消除" class="headerlink" title="锁消除"></a>锁消除</h3><p>锁消除是一种更彻底的锁优化，JVM 在 JIT 编译时，通过对运行上下文的扫描，去除不可能存在的共享资源竞争的锁，通过锁消除，可以节省毫无意义的请求锁的时间。</p>
+<h2 id="用户锁优化"><a href="#用户锁优化" class="headerlink" title="用户锁优化"></a>用户锁优化</h2><ul>
+<li>减少锁持有的时间</li>
+<li>减小锁粒度</li>
+<li>读写分离锁代理独占锁</li>
+<li>锁分离</li>
+<li>锁粗话 （针对平凡连续加锁行为，可进行锁粗化）</li>
+</ul>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        
+          
+        
+        <div class="post-tags">
+          
+            <a href="/tags/Java/" rel="tag"># Java</a>
+          
+            <a href="/tags/并发/" rel="tag"># 并发</a>
+          
+            <a href="/tags/锁/" rel="tag"># 锁</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/06/24/java并发编程实践(二)/" rel="next" title="java并发编程实践(二)---java 任务执行">
+                <i class="fa fa-chevron-left"></i> java并发编程实践(二)---java 任务执行
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/06/27/ConCurrentHashMap源码分析/" rel="prev" title="ConCurrentHashMap 源码分析">
+                ConCurrentHashMap 源码分析 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/uploads/headpiture.jpg" alt="zlksilence">
+            
+              <p class="site-author-name" itemprop="name">zlksilence</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">18</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                      <a href="/categories/">
+                    
+                  
+                    
+                    
+                      
+                    
+                    <span class="site-state-item-count">1</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">15</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/zlksilence" title="GitHub &rarr; https://github.com/zlksilence" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:zksilence@gmail.com" title="E-Mail &rarr; mailto:zksilence@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#java监视器"><span class="nav-number">1.</span> <span class="nav-text">java监视器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#synchronized"><span class="nav-number">2.</span> <span class="nav-text">synchronized</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#volatile"><span class="nav-number">3.</span> <span class="nav-text">volatile</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#显示锁lock"><span class="nav-number">4.</span> <span class="nav-text">显示锁lock</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#wait-和notify"><span class="nav-number">5.</span> <span class="nav-text">wait()和notify()</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Threadlocal"><span class="nav-number">6.</span> <span class="nav-text">Threadlocal</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CountDownLatch"><span class="nav-number">7.</span> <span class="nav-text">CountDownLatch</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#死锁"><span class="nav-number">8.</span> <span class="nav-text">死锁</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#常见类型"><span class="nav-number">8.1.</span> <span class="nav-text">常见类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#避免和诊断"><span class="nav-number">8.2.</span> <span class="nav-text">避免和诊断</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#其它"><span class="nav-number">8.3.</span> <span class="nav-text">其它</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#java存储模型"><span class="nav-number">9.</span> <span class="nav-text">java存储模型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#比较并交换（Compare-and-swap-CAS）"><span class="nav-number">10.</span> <span class="nav-text">比较并交换（Compare and swap, CAS）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JVM对内部锁的优化"><span class="nav-number">11.</span> <span class="nav-text">JVM对内部锁的优化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#对象头"><span class="nav-number">11.1.</span> <span class="nav-text">对象头</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#偏向锁"><span class="nav-number">11.2.</span> <span class="nav-text">偏向锁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#轻量级锁"><span class="nav-number">11.3.</span> <span class="nav-text">轻量级锁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#自旋锁"><span class="nav-number">11.4.</span> <span class="nav-text">自旋锁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#锁消除"><span class="nav-number">11.5.</span> <span class="nav-text">锁消除</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#用户锁优化"><span class="nav-number">12.</span> <span class="nav-text">用户锁优化</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zlksilence</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.9.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> v7.2.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+    
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=3.4.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.2.0"></script>
+
+  <script src="/js/motion.js?v=7.2.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/affix.js?v=7.2.0"></script>
+
+  <script src="/js/schemes/pisces.js?v=7.2.0"></script>
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.2.0"></script>
+<script src="/js/post-details.js?v=7.2.0"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.2.0"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
