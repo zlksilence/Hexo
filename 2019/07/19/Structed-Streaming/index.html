@@ -103,9 +103,9 @@
 <meta property="og:description" content="此篇主要记录自己在项目中学习使用Structed Streaming过程中遇到的问题及解决办法, 学习时间不长,不到一周,为了项目临时写的,仅供参考。关于Structured Streaming的全面介绍参考 Structed Streraming 介绍​        从Spark2.0之后,Spark Streaming开始引入一种新的流式引擎:Structed Streaming 。开发这套">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="http://yoursite.com/imag/Spark/structured-streaming-stream-as-a-table.png">
-<meta property="og:image" content="http://yoursite.com/imag%5CSpark%5Cstructured-streaming-model.png">
-<meta property="og:image" content="http://yoursite.com/imag%5CSpark%5Cstructured-streaming-example-model.png">
-<meta property="og:updated_time" content="2019-07-19T09:44:40.211Z">
+<meta property="og:image" content="http://yoursite.com/imag/Spark/structured-streaming-model.png">
+<meta property="og:image" content="http://yoursite.com/imag/Spark/structured-streaming-example-model.png">
+<meta property="og:updated_time" content="2019-07-19T09:47:50.975Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Structed Streaming学习">
 <meta name="twitter:description" content="此篇主要记录自己在项目中学习使用Structed Streaming过程中遇到的问题及解决办法, 学习时间不长,不到一周,为了项目临时写的,仅供参考。关于Structured Streaming的全面介绍参考 Structed Streraming 介绍​        从Spark2.0之后,Spark Streaming开始引入一种新的流式引擎:Structed Streaming 。开发这套">
@@ -365,7 +365,7 @@
                 
               
 
-              <time title="创建时间：2019-07-19 17:38:48 / 修改时间：17:44:40" itemprop="dateCreated datePublished" datetime="2019-07-19T17:38:48+08:00">2019-07-19</time>
+              <time title="创建时间：2019-07-19 17:38:48 / 修改时间：17:47:50" itemprop="dateCreated datePublished" datetime="2019-07-19T17:38:48+08:00">2019-07-19</time>
             </span>
           
 
@@ -428,7 +428,7 @@
 <p><img src="/imag/Spark/structured-streaming-stream-as-a-table.png" alt></p>
 <p>将数据流始为“输入表”，到达流的每个数据项都像一个新行被附加到输入表（当然也可以不新加而是更新表中的数据，比如聚合操作）。</p>
 <p>还可以定义触发间隔 trigger interva，每个 trigger interva将使新行追加到结果表中，结果表一旦有更新，则会根据输出模式output mode输出到外部Sink（Sink，相当外部的数据源）。</p>
-<p><img src="/imag%5CSpark%5Cstructured-streaming-model.png" alt></p>
+<p><img src="/imag/Spark/structured-streaming-model.png" alt></p>
 <p>​    Output Mode：输出模式告诉我们如何将<strong>结果表</strong>输出，上述单词统计输出就指定了“complete”，实际还可以有其他模式包括“append”、“<em>Update</em>”，这几个好理解，结果表那么大，输出模式告诉程序是将<strong>全部结果都输出</strong>，还是只<strong>输出新加的</strong>，还是<strong>输出更新过的</strong>。</p>
 <p>​    Output Sinks：就是外部数据源，<strong>结果表</strong>一开始都是存在内存中，我们定义好了输出模式，另一部分就是定义结果数据输出到哪里。上述单词统计就是输出到了控制台，着方便于我们查看和调试，其他Sink包括：</p>
 <ol>
@@ -449,7 +449,7 @@
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">writeStream</span><br><span class="line">    .format(<span class="string">"console"</span>)</span><br><span class="line">    .start()</span><br></pre></td></tr></table></figure>
 
 <p>单词统计流程示例：</p>
-<p><img src="/imag%5CSpark%5Cstructured-streaming-example-model.png" alt></p>
+<p><img src="/imag/Spark/structured-streaming-example-model.png" alt></p>
 <p>疑问：**随着程序运行，那结果表岂不越来越大？</p>
 <p>​    它从流数据源读取最新的可用数据，逐步处理以更新结果，然后丢弃源数据。它仅保留更新结果所需的最小中间<em>状态</em>数据（例如，前面示例中的中间计数）。结果表，确实是逐步增大，但这只是针对输出模式“complete”。若是“append”，那么老旧数据就可以不要了，这样结果表就不会逐步增大了。一般使用“complete”，都是我们使用了聚合GroupBy等操作，这操作都是和应用有关，如单词统计，统计所有单词出现的数量，这里我们必须输出流上的全部的结果。</p>
 <h3 id="支持的操作"><a href="#支持的操作" class="headerlink" title="支持的操作"></a>支持的操作</h3><p>​    Structured Streraming 都是使用DataFrane处理数据，但这里的DataFrame沿用和Spark Streaming下一样的类，<strong>并不意味着里面的方法都能是使用</strong>。在示例程序中我们使用了：</p>
