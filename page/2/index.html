@@ -314,479 +314,6 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/06/24/Assignment 3 Steganography/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="zlksilence">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/uploads/headpiture.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="silence">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                
-                <a href="/2019/06/24/Assignment 3 Steganography/" class="post-title-link" itemprop="url">Assignment 3 Steganography</a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-
-          
-          
-          
-
-          
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-
-              
-                
-              
-
-              <time title="创建时间：2019-06-24 16:18:55" itemprop="dateCreated datePublished" datetime="2019-06-24T16:18:55+08:00">2019-06-24</time>
-            </span>
-          
-
-          
-            
-
-            
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">更新于</span>
-                
-                <time title="修改时间：2019-07-09 21:21:34" itemprop="dateModified" datetime="2019-07-09T21:21:34+08:00">2019-07-09</time>
-              </span>
-            
-          
-
-          
-
-          
-            
-            
-          
-
-          
-          
-
-          
-
-          <br>
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h1><p><a href="https://en.wikipedia.org/wiki/Steganography" target="_blank" rel="noopener">Steganography</a> refers to hiding information such as text/images/data within another file/message/data with the intent of concealing the existence of the hidden information. A common method for this is hiding data within the least significant bits of the bytes representing colours in an image. The LSB can be represented as 0b00000001, 0x01 or 1 and the MSB can be represented as 0b10000000, 0x80 or 128.</p>
-<p>You are to write a program that can be used to hide data from a supplied file in the low bits of a supplied image file. The same program will also be able to check the size of hidden data, extract the data and verify, using a checksum, the integrity of the hidden data in an image.</p>
-<h1 id="Encoding"><a href="#Encoding" class="headerlink" title="Encoding"></a>Encoding</h1><p><img src="https://static.edusercontent.com/files/umhGWvrf2BLnbt07JkWexXQv" alt="img"></p>
-<p>Bitmap files (<code>*.bmp</code>) are a relatively simple file format. The file consists of a header containing metadata about the pixel format and image size and is <code>m</code> bytes long. The pixel data follows in the remaining <code>l</code> bytes, the size of which can be calculated from the information in the header. The basic specification only requires you handle these files and a <code>bitmap</code> module is supplied to assist in getting the length of the header in bytes and the length of the pixel data in bytes.</p>
-<p><img src="https://static.edusercontent.com/files/MzqCKX0tcwNytFX6U81xDaIs" alt="img"></p>
-<p>The program shall only modify the data relating to pixel bytes and shall copy the header information required for the image file format without modification. Concealing a single byte within the pixel data is depicted in the above diagram. The MSB of concealed data shall be placed in lower index pixel bytes and the LSB in higher index pixel bytes. Where multiple bits are concealed per byte of pixel data (as in a following diagram) the more significant bits of concealed data shall be placed in more significant bits of the pixel byte. Where there are insufficient bits of the current byte of concealed data to fill the required number of bits in the pixel byte the most significant bit(s) of the next byte of concealed data shall be utilised.</p>
-<p>The format of the concealed data consists of a 32 bit unsigned integer giving the length of the data payload, the data payload and a 32 bit unsigned integer checksum of the data payload. The data length and checksum parameters are always encoded as 1 concealed bit per byte of pixel data. The concealed data is encoded as the minimum number of concealed bits per byte of pixel data to completely encode the payload. This may require 2, 3 or even 8 bits concealed per byte of pixel data. Where multiple bits are required per byte more significant bits of concealed data are encoded in the more significant bits of the pixel data as shown in a following diagram where concealing 3 bits per byte of pixel data is depicted. Once all the bytes of the data payload have been concealed remaining bits in the current pixel byte shall be set to 0 and remaining pixel bytes (until the last 32 bytes for the checksum) shall be copied unmodified.</p>
-<p><img src="https://static.edusercontent.com/files/G2ZRyBfgTu3fVIwAWPVJNgSJ" alt="img"></p>
-<p>Given <code>o</code> bytes of data to conceal the <em>output</em> image file that has <code>l</code> bytes of pixel data shall have:</p>
-<ol>
-<li><code>m</code> bytes of header data directly copied from the <em>input</em> source image file. </li>
-<li>32 bytes of pixel data with the length of the data payload <code>o</code> concealed 1 bit per byte.</li>
-<li><code>p</code> bytes of modified pixel data<ol>
-<li><code>r</code> bits of concealed data per pixel byte shall be used where,</li>
-<li>r is the minimum number of bits per pixel such that the concealed data can fit within the available pixel values.</li>
-<li>r is an integer value such that the following is true <code>(r - 1) * (l - 64) &lt; (o * 8) &amp;&amp; r * (l - 64) &gt;= (o * 8)</code></li>
-<li>If (<code>r * p) != (o * 8)</code> the ‘concealed’ bits will be append with <code>s</code> ‘0’ bits such that <code>(r * p) == (s + o * 8)</code>.</li>
-</ol>
-</li>
-<li><code>q</code> bytes of unmodified pixel data.</li>
-<li>32 bytes of pixel data with the checksum of the data payload concealed 1 bit per byte.</li>
-</ol>
-<p><img src="https://static.edusercontent.com/files/nptFahhlPgsye67hOWnm7XXO" alt="img"></p>
-<p>Once all the concealed data is encoded the remaining bytes are copied unmodified until the checksum. If at the end of the concealed data there are insufficient bits to fill the last pixel byte (as in the above diagram) the remaining bits shall be set to 0.</p>
-<h1 id="Basic-Specification-75"><a href="#Basic-Specification-75" class="headerlink" title="Basic Specification (75%)"></a>Basic Specification (75%)</h1><p>The program shall comply with the following specification:</p>
-<h2 id="1-Compilation-amp-Code"><a href="#1-Compilation-amp-Code" class="headerlink" title="1. Compilation &amp; Code"></a>1. Compilation &amp; Code</h2><ol>
-<li>The program shall be written in C and compiled with GCC using the C11 standard; the compiled executable shall be named <code>steg</code>. Compilation flags shall include “<code>-Wall -Wextra -Wpedantic -fsanitize=address -std=c11</code>“. Additional flags that do not remove/undo the effects of these flags shall be permitted.</li>
-<li>Compilation shall be through a <code>Makefile</code> that has <code>steg</code> and <code>clean</code> as targets.</li>
-<li>All comments in the source code shall be written in English.</li>
-</ol>
-<h2 id="2-Error-Handling"><a href="#2-Error-Handling" class="headerlink" title="2. Error Handling"></a>2. Error Handling</h2><ol>
-<li>All error messages, which are messages starting with “Error:”, shall be printed to the terminal using <code>stderr</code>.</li>
-<li>Where the specification states “exit immediately with error code n” this is to mean no further text shall be printed to the terminal and the return statement in <code>main</code> shall return <code>n</code>. All allocated memory shall be properly freed.</li>
-<li>Errors shall be responded to in the following order:<ol>
-<li>Left to right for command line options.</li>
-<li>Missing input files before existing output files.</li>
-<li>Payload size relative to image size.</li>
-<li>Checksum verification.</li>
-</ol>
-</li>
-<li>If no errors occur the program shall return an error code of 0.</li>
-</ol>
-<h2 id="3-Command-Line-Options"><a href="#3-Command-Line-Options" class="headerlink" title="3. Command Line Options"></a>3. Command Line Options</h2><ol>
-<li><p>The program will accept 1, 2 or 3 non-option arguments (arguments after and including the first argument that doesn’t start with <code>-</code>). The following points specify the differing behaviour of the program with each number of arguments.</p>
-</li>
-<li><p>Optional arguments may modify the behaviour of the program and shall be given before any non-option arguments.</p>
-</li>
-<li><p>If the program is given zero non-option arguments it shall print <code>Error: No file name provided.\n</code> and exit immediately with error code 7.</p>
-</li>
-<li><p>If the program is given more than three non-option arguments it shall print <code>Error: Too many file names provided.\n</code> and exit immediately with error code 6.</p>
-</li>
-<li><p>If the program is given three non-option arguments it shall treat the first non-option argument as the name of an <em>input</em> source image file, the second non-option argument as the name of an <em>input</em> source data file and the third non-option argument as the name of an <em>output</em> destination image file. It shall then embed the contents of the input source data file in the input source image pixels and output to the destination image file the modified pixel values and unmodified file format/header information.</p>
-</li>
-<li><p>If the program is given two non-option arguments it shall treat the first non-option argument as an <em>input</em> image file with encoded data and the second non-option argument as an <em>output</em> data file. It shall then extract the contents of the input image file to the output data file.</p>
-</li>
-<li><p>If the program is given one non-option argument it shall treat it as an <em>input</em> image file with encoded data and only decode if another option is specified.</p>
-</li>
-<li><p>The program shall accept the optional argument <code>-h</code> which shall cause the program to print the specified help message and immediately exit with error code 1. The help message is:</p>
-<p>Text</p>
-</li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">Usage: steg [-vncp] source_image [[data_file] [output_image]]</span><br><span class="line"></span><br><span class="line">Steganographically conceal/extract data from an image.</span><br><span class="line"> </span><br><span class="line">With three arguments will conceal data from data_file within source_image and</span><br><span class="line"> </span><br><span class="line">output to output_image. One and two argument versions inspect (and optionally save)</span><br><span class="line"> </span><br><span class="line">data from an image with concealed data.</span><br><span class="line"></span><br><span class="line">  -c  Print the checksum of the concealed data.</span><br><span class="line"> </span><br><span class="line">  -h  Print this help message.</span><br><span class="line"> </span><br><span class="line">  -n  Print the number of concealed bytes.</span><br><span class="line"></span><br><span class="line">  -p  Print the contents of a concealed image/data file when concealing. Assuming text data.</span><br><span class="line"> </span><br><span class="line">  -v  Verify checksum of an image with concealed data. Invalid if an output image is specified.</span><br></pre></td></tr></table></figure>
-
-
-
-<ol start="9">
-<li><p>The program shall accept the optional argument <code>-n</code> which shall cause the program to print the length of hidden data in bytes, in the format <code>Hidden data length: 45643 bytes.\n</code>.</p>
-</li>
-<li><p>The program shall accept the optional argument <code>-c</code> which shall cause the program to print the checksum of the hidden data as a 32-bit hex number in the format <code>Checksum: 0x0400F50F.\n</code>. When the <em>input</em> image contains hidden data, as signified by a command line containing 1 or 2 non-option arguments, this checksum value shall be read from the stored checksum. When creating an <em>output</em> image containing hidden data the checksum value printed shall be checksum calculated from the <em>input</em> data.</p>
-</li>
-<li><p>The program shall accept the option argument <code>-p</code> which shall cause the program to print the hidden data (treating it as a text file/string) between two lines that each consist of 80 hyphens:</p>
-</li>
-</ol>
-<pre><code>Text
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">--------------------------------------------------------------------------------</span><br><span class="line">This is the contents of a text file. The first line was very long and did not end at 80 characters.</span><br><span class="line"></span><br><span class="line">This file ended with a new line character and means there is a blank line before the hyphens.</span><br><span class="line"></span><br><span class="line">--------------------------------------------------------------------------------</span><br></pre></td></tr></table></figure></code></pre><ol start="12">
-<li><p>The program shall accept the optional argument <code>-v</code> which shall cause the program to verify the checksum with the data. The <code>-v</code> optional argument shall be valid only with one and two non-option argument invocations of the program. If the optional argument <code>-v</code>Iis used with the three non-option argument invocation of the program the program shall print <code>Error: -v invalid when concealing data.\n</code> and exit immediately with error code 11. If the calculated checksum differs from the stored checksum the program shall print <code>Error: Checksum mismatch.\n</code> and exit immediately with error code 12. If the calculated checksum matches the stored checksum the program shall print <code>Checksums match.\n</code>. </p>
-</li>
-<li><p>If the program finds an optional argument that it is not known it shall print <code>Error: Unknown option -%s.\n</code> and immediately exit with error code 8.</p>
-</li>
-<li><p>Output/effects from processing optional arguments shall occur after any output files have been written and will occur in the order <code>-p</code>, <code>-n</code>, <code>-c</code>, <code>-v</code>.</p>
-</li>
-</ol>
-<h2 id="4-File-Handling"><a href="#4-File-Handling" class="headerlink" title="4. File Handling"></a>4. File Handling</h2><ol>
-<li>If a nominated <em>input</em> file does not exist the program shall print an error message <code>Error: Input file %s was not found.\n</code> and exit immediately with error code 2. The token  <code>%s</code> shall be replaced with the name of the file that was nominated.</li>
-<li>If a nominated <em>output</em> file exists the program shall inquire of the user <code>Output file %s already exists. Overwrite (y/n)?</code>  If an affirmative answer (<code>y, yes</code> - case insensitive) is received, the program shall continue and overwrite the file. If the answer is negative (<code>n, no</code> - case insensitive) the program shall emit no further messages and exit immediately with error code 3. If any other value is received the program shall ask the question again.</li>
-<li>If the data to be encoded cannot fit within the source image pixel values (see encoding details above) the program shall print <code>Error: Input data too large to hide within source image.\n</code> and exit immediately with error code 5.</li>
-<li>If when attempting to decode an <em>input</em> image file the decoded data size is too large to be concealed within the image file the program shall print an error message <code>Error: Image file too small to conceal %i bytes of data.\n</code> and exit immediately with error code 9.</li>
-</ol>
-<h2 id="5-Checksum"><a href="#5-Checksum" class="headerlink" title="5. Checksum"></a>5. Checksum</h2><p>A <a href="https://en.wikipedia.org/wiki/Checksum" target="_blank" rel="noopener">checksum</a> is a method to check if data has been modified or changed. It is a function of the data and is generally sensitive to changes of a single bit. As we are storing data within an image we need a way to verify that it has not been corrupted in an image editing program. To this end we have devised a relatively simple checksum to use.</p>
-<ol>
-<li>The data payload shall be broken into 16-bit unsigned short integers using <a href="https://en.wikipedia.org/wiki/Endianness" target="_blank" rel="noopener">little endian</a> ordering.</li>
-<li>Each short shall be squared (multiplied by itself) and the result stored in an unsigned integer (32-bit).</li>
-<li>The result of the squaring operation shall be successively XOR’d (<code>^</code> operator) to get the final checksum.</li>
-<li>If the data payload has an odd number of bytes an additional zero byte shall be appended onto the end for the purposes of calculating the checksum but shall not be stored/concealed within the pixel bytes.</li>
-</ol>
-<h1 id="Code-Quality-25"><a href="#Code-Quality-25" class="headerlink" title="Code Quality (25%)"></a>Code Quality (25%)</h1><p>A quarter of your mark will be based on code quality. This includes consistent and clear formatting, sensible variable and function names (self-documenting), succinct, clear and appropriate comments as well as cohesive module design, correct usage of headers and control structures (switch, if-else if-else, while, for).</p>
-<h1 id="Extension-Bonus-10"><a href="#Extension-Bonus-10" class="headerlink" title="Extension (Bonus 10%)"></a>Extension (Bonus 10%)</h1><p>We are adding a <strong>difficult</strong> bonus extension to this project. It is not expected that many will be able to complete this but is posed as a challenge. Instead of handling only bitmaps your program shall also accept png image files. Png is another image format that has lossless compression. An open source library is available to assist with parsing and accessing the data (<code>libpng</code>). This extension will involve recognising the image format from the extension of the filename (png vs bmp). We won’t ask you to convert between formats (input image format will match the output format).</p>
-<p>No assistance will be provided in the use of <code>libpng</code> so that you will have to rely on reading the documentation which is available online at the libpng <a href="http://www.libpng.org/pub/png/libpng.html" target="_blank" rel="noopener">website</a>.</p>
-<h1 id="Constraints"><a href="#Constraints" class="headerlink" title="Constraints"></a>Constraints</h1><ol>
-<li>All images provided will be valid bitmaps and the supplied bitmap files <code>bitmap.h</code> and <code>bitmap.o</code> will be able to give the lengths of header and pixel data reliably.</li>
-<li>Although <code>getopt</code> can handle splitting <code>-pnc</code> to <code>-p -n -c</code> we will not be testing this. We will test:<ol>
-<li>Other optional arguments like <code>-x</code></li>
-<li>Too many/too few non-option arguments.</li>
-</ol>
-</li>
-</ol>
-<h1 id="Hints"><a href="#Hints" class="headerlink" title="Hints"></a>Hints</h1><ol>
-<li><p>Command line parsing without <code>getopt</code> will be difficult.</p>
-</li>
-<li><p>Encoding a single bit per byte is significantly easier than the general case.</p>
-</li>
-<li><p>Two bits per byte is still significantly easier than the general case as well.</p>
-</li>
-<li><p><code>fopen</code> has enhanced handling for cases when files exist in C11.</p>
-</li>
-<li><p>When creating your <code>Makefile</code> be careful not to delete the supplied <code>bitmap.o</code>. If you do another one copy can be obtained here.</p>
-<p><a href="https://static.edusercontent.com/files/hvsCDqP69yWYTvOp4snB7NeY" target="_blank" rel="noopener">bitmap.o</a></p>
-</li>
-<li><p>Be careful you encode/decode bits in the specified order. We are checking for exact matches in the encoded images.</p>
-</li>
-<li><p>You can manually inspect the contents (byte by byte) of files using the <code>xxd</code> program. For example, <code>xxd -l len -b filename</code> will display ‘len’ bytes of the file named ‘filename’, in binary format.</p>
-</li>
-</ol>
-<h1 id="Execution"><a href="#Execution" class="headerlink" title="Execution"></a>Execution</h1><ol>
-<li>Your submission must include a <code>Makefile</code> that you shall provide. You can use a previously supplied <code>Makefile</code> as a template and adapt it to this assignment or write your own less generic <code>Makefile</code> based on the lecture slides.</li>
-<li>The executable that is created shall be called <code>steg</code>. It shall be created in the root directory of your submission.</li>
-<li>Your code shall be compiled by executing the command <code>make clean &amp;&amp; make</code> in the root directory of your submission. This shall delete all intermediate object files (except <code>bitmap.o</code>) and build the <code>steg</code> program.</li>
-</ol>
-<h1 id="Libraries"><a href="#Libraries" class="headerlink" title="Libraries"></a>Libraries</h1><p>You may use any function in the C11 standard library. You additionally may use the <code>getopt</code> function from the GNU C Library (found in header <code>getopt.h</code>). We also supply files  <code>bitmap.o</code> and <code>bitmap.h</code> that enable parsing of bitmaps to get the length of the bitmap header and size of pixel data. If attempting the png extension you may additionally utilise <code>libpng</code> which is already available within edstem.</p>
-<p>The following library functions are likely to be useful:</p>
-<p>Header <strong>&lt;stdio.h&gt;</strong> has file input/output functions: <strong>fread(), fwrite(), fopen(), fseek(), fclose()</strong><br>Header <strong>&lt;getopt.h&gt;</strong> has argument parsing function: <strong>getopt()</strong><br>Header <strong>&lt;assert.h&gt;</strong> has the bug-catching macro: <strong>assert()</strong></p>
-<h1 id="Expectations"><a href="#Expectations" class="headerlink" title="Expectations"></a>Expectations</h1><ul>
-<li>This is an individual assignment, not group work. Although you can consult others about the use of specific functions, the code that you submit must be solely your own work: The result of your thought processes, design decisions, implementation and testing.</li>
-<li>We expect you to follow good design practices, including the use of functions to reduce complexity and code repetition.</li>
-<li>You will make completing the assignment significantly easier if you start work on it early and adopt an incremental approach to implementation and testing. In other words, <ul>
-<li>Do not code the entire program and then submit it for testing. Instead, code a small subsection and test it, then incrementally extend this subsection and re-test.</li>
-<li>Do not submit your first code at 10pm on the night that the assignment is due and expect everything to work…</li>
-</ul>
-</li>
-<li>Avoid submitting just before it is due - clock synchronisation or build times may shift your final submission to microseconds after the cutoff 11:59:00PM and result in late penalties.</li>
-<li>Elements of the project are intended to be challenging. The extension in particular is designed to challenge the most skilled amongst you.</li>
-</ul>
-<h1 id="Academic-Honesty"><a href="#Academic-Honesty" class="headerlink" title="Academic Honesty"></a>Academic Honesty</h1><p>While the University is aware that the vast majority of students and staff act ethically and honestly, it is opposed to and will not tolerate academic dishonesty or plagiarism and will treat all allegations of dishonesty seriously.</p>
-<p>Further information on academic honesty, academic dishonesty, and the resources available to all students can be found on the academic integrity pages on the current students website:</p>
-<p><a href="https://sydney.edu.au/students/academic-integrity.html" target="_blank" rel="noopener">https://sydney.edu.au/students/academic-integrity.html</a>. </p>
-
-          
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-      
-    
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/06/24/Cassandra 教程（2）——系统启动流程/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="zlksilence">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/uploads/headpiture.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="silence">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                
-                <a href="/2019/06/24/Cassandra 教程（2）——系统启动流程/" class="post-title-link" itemprop="url">Cassandra 教程（2）——系统启动流程</a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-
-          
-          
-          
-
-          
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-
-              
-                
-              
-
-              <time title="创建时间：2019-06-24 16:18:55" itemprop="dateCreated datePublished" datetime="2019-06-24T16:18:55+08:00">2019-06-24</time>
-            </span>
-          
-
-          
-            
-
-            
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">更新于</span>
-                
-                <time title="修改时间：2019-07-09 21:38:22" itemprop="dateModified" datetime="2019-07-09T21:38:22+08:00">2019-07-09</time>
-              </span>
-            
-          
-
-          
-
-          
-            
-            
-          
-
-          
-          
-
-          
-
-          <br>
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="程序入口："><a href="#程序入口：" class="headerlink" title="程序入口："></a>程序入口：</h2><h3 id="初始化构造函数"><a href="#初始化构造函数" class="headerlink" title="初始化构造函数"></a>初始化构造函数</h3><p>上节可知程序入口为：org.apache.cassandra.service.CassandraDaemon</p>
-<p>此主类使用的单例模式：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> CassandraDaemon instance = <span class="keyword">new</span> CassandraDaemon();</span><br></pre></td></tr></table></figure>
-
-<p>CassanDaemon 首先创建一个自己的实例。构造函数只进行了一些运行前的环境检查。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">CassandraDaemon</span><span class="params">()</span></span></span><br><span class="line"><span class="function"> </span>&#123;</span><br><span class="line">     <span class="keyword">this</span>(<span class="keyword">false</span>);</span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line"> <span class="function"><span class="keyword">public</span> <span class="title">CassandraDaemon</span><span class="params">(<span class="keyword">boolean</span> runManaged)</span></span></span><br><span class="line"><span class="function"> </span>&#123;</span><br><span class="line">     <span class="keyword">this</span>.runManaged = runManaged;</span><br><span class="line">     <span class="keyword">this</span>.startupChecks = <span class="keyword">new</span> StartupChecks().withDefaultTests();</span><br><span class="line">     <span class="keyword">this</span>.setupCompleted = <span class="keyword">false</span>;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="main函数运行"><a href="#main函数运行" class="headerlink" title="main函数运行"></a>main函数运行</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span></span></span><br><span class="line"><span class="function">  </span>&#123;</span><br><span class="line">      instance.activate();</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
-
-<p>main中通过调用<code>activate()</code>进行读取配置参数、初始化JMX等</p>
-<h4 id="读取配置参数"><a href="#读取配置参数" class="headerlink" title="读取配置参数"></a>读取配置参数</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//进行参数初始化 结果保存在DatabaseDescriptor里</span></span><br><span class="line"> DatabaseDescriptor.daemonInitialization();</span><br></pre></td></tr></table></figure>
-
-<p>DatabaseDescriptor 中保存有所有的配置参数及其对象</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">	<span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DatabaseDescriptor</span></span></span><br><span class="line"><span class="class"></span>&#123;	</span><br><span class="line">	...</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> IEndpointSnitch snitch;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> InetAddress listenAddress; <span class="comment">// leave null so we can fall through to getLocalHost</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> InetAddress broadcastAddress;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> InetAddress rpcAddress;</span><br><span class="line">    ...</span><br></pre></td></tr></table></figure>
-
-<p>org.apache.cassandra.config 囊括了所有与配置参数有关的类，结构如下：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line"><span class="comment">//cassandra.config 之前在VM optionts中指定了配置文件路径</span></span><br><span class="line"> String configUrl = System.getProperty(<span class="string">"cassandra.config"</span>);</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
-
-
-          
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-      
-    
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/06/24/linux 常用命令/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -890,6 +417,689 @@
 <h2 id="scp-：ssh传输文件"><a href="#scp-：ssh传输文件" class="headerlink" title="scp ：ssh传输文件"></a>scp ：ssh传输文件</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">downlode from server</span></span><br><span class="line">scp username@servername:/path/filename tmp.local_destination</span><br><span class="line"><span class="meta">#</span><span class="bash">uplode to server</span></span><br><span class="line">scp /path/local_filename username@servername:/path</span><br><span class="line"><span class="meta">#</span><span class="bash">filefold</span></span><br><span class="line">scp -r ~</span><br><span class="line"><span class="meta">#</span><span class="bash">username@servername can be host name</span></span><br></pre></td></tr></table></figure>
 
 <p>###参开文献</p>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/06/24/深入理解java虚拟机-笔记/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="zlksilence">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/uploads/headpiture.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="silence">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2019/06/24/深入理解java虚拟机-笔记/" class="post-title-link" itemprop="url">深入理解java虚拟机</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+
+          
+          
+          
+
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-06-24 16:18:55" itemprop="dateCreated datePublished" datetime="2019-06-24T16:18:55+08:00">2019-06-24</time>
+            </span>
+          
+
+          
+            
+
+            
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-07-09 21:41:56" itemprop="dateModified" datetime="2019-07-09T21:41:56+08:00">2019-07-09</time>
+              </span>
+            
+          
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          <br>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>个人学习笔记</p>
+<h2 id="java虚拟机运行数据区域"><a href="#java虚拟机运行数据区域" class="headerlink" title="java虚拟机运行数据区域"></a>java虚拟机运行数据区域</h2><p>方法区保存class信息和static变量 所有线程共享    </p>
+<p>堆保存对象实例，其中有指向方法区类的指针。只存有对象实体，不含有基本类型和对象引用</p>
+<p><img src="/imag%5Cjava%5Cjavaxuniji.png" alt="java 运行数据区"></p>
+<h2 id="垃圾回收"><a href="#垃圾回收" class="headerlink" title="垃圾回收"></a>垃圾回收</h2><h3 id="引用计数法"><a href="#引用计数法" class="headerlink" title="引用计数法"></a>引用计数法</h3><p>给对象中添加一个引用计数器，每当有一个地方引用时，计数器加1；引用失效时，计数器值就减1；计数器为0时，对象不在可能被使用。</p>
+<p>方法简单、高效，但存在难于解决对象之间相互循环引用（A中保留对B的引用，B中保存对A的引用）的问题。java 虚拟机并没有使用。</p>
+<h3 id="可达性分析算法"><a href="#可达性分析算法" class="headerlink" title="可达性分析算法"></a>可达性分析算法</h3><p><img src="/imag%5Cjava%5Cgckedaxing.png" alt="gckedaxing"></p>
+<p>可作为GC ROOTs的对象：</p>
+<ul>
+<li>虚拟机栈（栈帧中的本地变量表）中的引用对象</li>
+<li>方法区中的类静态属性引用对象</li>
+<li>方法区中的常量引用对象</li>
+<li>本地方法栈中的JNI引用的对象</li>
+</ul>
+<h3 id="回收算法"><a href="#回收算法" class="headerlink" title="回收算法"></a>回收算法</h3><ul>
+<li><p>标记清除</p>
+</li>
+<li><p>标记复制 </p>
+<p>内存划分为两块区域，每次内存在其中一块进行垃圾回收，将此块存活的对象复制到另一个区域内。优化：大部分对象都会在一次垃圾回收中被回收掉，所以并不需要两块内存区域对等划分。一般将内存划分为一块较大的<strong>Eden空间</strong>和<strong>两块较小的Survior空间</strong>，每次使用Eden和其中一块Survior。当回收时将存活的对象一次性复制到另一个Survior区域。HotSpot中默认Eden和Survivor的比例是8：1，所以每次新生代中可用的空间为整个新生代空间的90%。这就导致有时存活的对象有时超过10%，这时就需要老年代进行<strong>分配担保</strong></p>
+</li>
+<li><p>标记整理</p>
+</li>
+</ul>
+<h3 id="分代收集算法"><a href="#分代收集算法" class="headerlink" title="分代收集算法"></a>分代收集算法</h3><p>​    即根据对象存活的周期的不同将内存划分为几块。</p>
+<ul>
+<li><p>新生代： 复制算法。适合对象在每次收集时都会大量死去，只有少量存活的</p>
+</li>
+<li><p>老年代：标记整理。适合对象存活率较高的、没有额外空间对其进行担保的。</p>
+</li>
+</ul>
+<h3 id="内存分配与回收"><a href="#内存分配与回收" class="headerlink" title="内存分配与回收"></a>内存分配与回收</h3><ul>
+<li><strong>对象优先在Eden分配</strong>，如果Eden空间不够，虚拟机则进行一次<strong>Minor GC（新生代的垃圾回收）</strong>。</li>
+<li><strong>大对象直接进入老年代</strong>。有参数：-XX：PretenureSizeThreshold 可以设置大于这个值的对象直接在老年代分配空间（避免新生代Eden和Survivor发生大量内存的复制）。</li>
+<li><strong>长期存活的对象将进入老年代</strong>。对象在Eden出生每次Minor GC都会使对象的年龄增加一次，当年龄超过一定的年龄（默认15）对象将晋升到老年代。参数-XX：MaxTenuringThreshold 设置最大年龄。</li>
+<li><strong>动态对象年龄判断</strong>。如果Survivor空间相同的年龄所有对象大小的总和大于Surivivor空间的一半，年龄大于或等于该年龄的对象就皆可以直接进入老年代无需等到年龄到达设置值。</li>
+<li><strong>空间分配担保</strong>。在发生MInor GC之前，虚拟机会检查老年代最大可用连续空间是否大于新生代所有对象总空间，如果这个条件成立则Minor GC可以确保安全，如果不成立则会继续检查老年代最大连续空间大小是否大于历次晋升到老年代对象的平均大小，如果是大于，则尝试今次那个一次Minor GC，否则进行触发一次<strong>Full GC（老年代的垃圾回收）</strong>。（主要是防止只是使用一个Survivor空间作为备份，若出现大量对象在Minor GC后仍然存活–极端所有对象都存活，就需要老年代进行分配担保）</li>
+</ul>
+<p>PS：</p>
+<p>Minor GS ：发生在新生代的垃圾收集操作。非常频繁。</p>
+<p>Major GC / Full GC ：发生在老年代的GC，一般比Minor GC慢10倍以上。</p>
+<p>新生代与老年代空间大小比例：1：2</p>
+<p>新生代内部Eden和Survivor 大小比例：8：1</p>
+<h3 id="垃圾回收器"><a href="#垃圾回收器" class="headerlink" title="垃圾回收器"></a>垃圾回收器</h3><p><img src=".%5Cimag%5Cjava%5CAll-GC.jpg" alt></p>
+<h4 id="Serial"><a href="#Serial" class="headerlink" title="Serial"></a>Serial</h4><p>​    最基本最悠久垃圾收集器。单线程运行。在垃圾回收时必须暂停其他所有的工作线程直到结束。“<strong>Stop The World</strong>”。新生代采用复制算法；老年代采用标记-整理算法。</p>
+<h4 id="ParNew"><a href="#ParNew" class="headerlink" title="ParNew"></a>ParNew</h4><p>​    Serial收集器的多线程版本。</p>
+<h4 id="Parallel-Scavenge"><a href="#Parallel-Scavenge" class="headerlink" title="Parallel Scavenge"></a>Parallel Scavenge</h4><p>​    一个新生代收集器，采用复制算法。关注点在于达到一个可控制的吞吐量。“<strong>吞吐量优先</strong>”的收集器</p>
+<p>PS：吞吐量=（运行用户代码时间）/（运行用户代码时间+垃圾回收的时间）</p>
+<h4 id="Serial-Old"><a href="#Serial-Old" class="headerlink" title="Serial Old"></a>Serial Old</h4><p>​    Serial收集器的老年代版本，同时单线程收集器。</p>
+<h4 id="Parallel-Old"><a href="#Parallel-Old" class="headerlink" title="Parallel Old"></a>Parallel Old</h4><p>​    Parallel Scavenge的老年代版本</p>
+<h4 id="CMS"><a href="#CMS" class="headerlink" title="CMS"></a>CMS</h4><p>​    CMS（ConCurrent Mark Sweep）收集器一种以<strong>获取最短回收停顿时间为目标</strong>的收集器。基于<strong>标记-清除</strong>算法</p>
+<ul>
+<li>初始标记</li>
+<li>并发标记</li>
+<li>重新标记</li>
+<li>并发清除</li>
+</ul>
+<p>初始标记和重新标记仍需要 Stop The World</p>
+<p>缺点：</p>
+<ul>
+<li><p>CMS收集器对CPU资源敏感</p>
+</li>
+<li><p>无法处理浮动垃圾</p>
+</li>
+<li><p>大量空间的碎片化</p>
+</li>
+</ul>
+<h4 id="G1-收集器"><a href="#G1-收集器" class="headerlink" title="G1 收集器"></a>G1 收集器</h4><p>​    G!（Garbage-First）当今收集器技术发展的最前沿的成果之一。整理上是基于<strong>标记-整理</strong>算法。</p>
+<p>特点：</p>
+<ul>
+<li><p>并行与并发</p>
+</li>
+<li><p>分代收集</p>
+</li>
+<li><p>空间整合</p>
+</li>
+<li><p>可预测的停顿</p>
+<p>G1将整个堆划分为多个大小相等的独立区域(Region),虽然保留新生代和老年代的概念,但新生代和老年代不再是物理隔离的了，他们都是一部分Region的集合。</p>
+<p>过程：</p>
+<ul>
+<li>初始标记</li>
+<li>并发标记</li>
+<li>最终标记</li>
+<li>筛选回收</li>
+</ul>
+</li>
+</ul>
+<h2 id="JDK-命令行工具"><a href="#JDK-命令行工具" class="headerlink" title="JDK 命令行工具"></a>JDK 命令行工具</h2><h3 id="jps：虚拟机进程状况工具"><a href="#jps：虚拟机进程状况工具" class="headerlink" title="jps：虚拟机进程状况工具"></a>jps：虚拟机进程状况工具</h3><pre><code>jps -l</code></pre><h3 id="jstat：虚拟机统计信息监视工具"><a href="#jstat：虚拟机统计信息监视工具" class="headerlink" title="jstat：虚拟机统计信息监视工具"></a>jstat：虚拟机统计信息监视工具</h3><pre><code>jstat -gc 2764 250 20</code></pre><h3 id="jinfo：Java-配置信息工具"><a href="#jinfo：Java-配置信息工具" class="headerlink" title="jinfo：Java 配置信息工具"></a>jinfo：Java 配置信息工具</h3><h3 id="jmap：Java内存映射工具"><a href="#jmap：Java内存映射工具" class="headerlink" title="jmap：Java内存映射工具"></a>jmap：Java内存映射工具</h3><h3 id="jhat：虚拟机堆转储快照分析工具"><a href="#jhat：虚拟机堆转储快照分析工具" class="headerlink" title="jhat：虚拟机堆转储快照分析工具"></a>jhat：虚拟机堆转储快照分析工具</h3><h3 id="jstack：Java堆栈跟踪工具"><a href="#jstack：Java堆栈跟踪工具" class="headerlink" title="jstack：Java堆栈跟踪工具"></a>jstack：Java堆栈跟踪工具</h3>
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/06/24/Mysql笔记/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="zlksilence">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/uploads/headpiture.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="silence">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2019/06/24/Mysql笔记/" class="post-title-link" itemprop="url">Mysql笔记-InnoDB存储引擎</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+
+          
+          
+          
+
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-06-24 16:18:55" itemprop="dateCreated datePublished" datetime="2019-06-24T16:18:55+08:00">2019-06-24</time>
+            </span>
+          
+
+          
+            
+
+            
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-07-11 21:28:55" itemprop="dateModified" datetime="2019-07-11T21:28:55+08:00">2019-07-11</time>
+              </span>
+            
+          
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          <br>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>​    《MySQL技术内幕:InnoDB存储引擎》</p>
+<h2 id="mysql"><a href="#mysql" class="headerlink" title="mysql"></a>mysql</h2><ul>
+<li><p>myslq存储引擎设计为插件形式可替换</p>
+<ul>
+<li>InnoDB 现在的默认引擎 支持事物</li>
+<li>MyISAM 不支持事物  以前默认引擎</li>
+<li>NDB 集群引擎</li>
+<li>Memory 数据放于内存 内存数据库</li>
+</ul>
+</li>
+<li><p>单进程多线程</p>
+</li>
+<li><p>体系结构</p>
+</li>
+<li><p><img src="/imag%5Cmysql%5C20150730152113099.jpg" alt></p>
+</li>
+<li><p>连接 </p>
+<ul>
+<li>远程连接使用tcp/ip 套连接字</li>
+<li>本地 linux 使用 UNIX域套连接字，windows可以使用命名管道、或共享内存（需要配置开启）</li>
+</ul>
+</li>
+</ul>
+<h2 id="innoDB"><a href="#innoDB" class="headerlink" title="innoDB"></a>innoDB</h2><p><img src="/imag%5Cmysql%5CQQ%E6%88%AA%E5%9B%BE20190614161014.png" alt></p>
+<h3 id="后台线程"><a href="#后台线程" class="headerlink" title="后台线程"></a>后台线程</h3><ul>
+<li><p>Master Thread</p>
+<p>核心线程，主要负责将缓冲区中的数据异步刷新到磁盘，保证数据的一致性，包括脏页的刷新、合并插入缓冲等</p>
+</li>
+<li><p>IO Thread</p>
+<p>包含read、write、insert buffer和log IO thread</p>
+</li>
+<li><p>Purge Thread</p>
+<p>回收已提交事物的undo log</p>
+</li>
+<li><p>Page Cleaner Thread</p>
+</li>
+</ul>
+<h3 id="内存数据对象"><a href="#内存数据对象" class="headerlink" title="内存数据对象"></a>内存数据对象</h3><p><img src="/imag%5Cmysql%5CQQ%E6%88%AA%E5%9B%BE20190614163145.png" alt></p>
+<h3 id="缓冲池设计-LRU"><a href="#缓冲池设计-LRU" class="headerlink" title="缓冲池设计 LRU"></a>缓冲池设计 LRU</h3><h3 id="关键特性"><a href="#关键特性" class="headerlink" title="关键特性"></a>关键特性</h3><ul>
+<li><p><strong>doublewWrte</strong> 机制 防止部分写入失效（InnoDB刷新脏页到磁盘时，发生宕机，如16kb页只写了前4kb，因为此页已写了一部分，无法使用重做日志进行恢复）</p>
+</li>
+<li><p><strong>InsertBuffer</strong></p>
+<p>在mysql insert中，行数据的插入都是按照主键递增的顺序进行插入的。因此，插入聚集索引（Primary Key）一般是顺序的，不需要磁盘的随机读取。但不可能每张表都只有一个聚集索引，若对多个非聚集索引，叶子结点的插入不再是顺序的了，这就需要离散的访问非聚集索引页。因此，insert buffer 解决了离散访问非聚集索引的问题，其对非聚集索引的插入不是一次直接插入到索引中，而是先判断是否在插入的非聚集索引页是否在缓冲池中，若不在则放入到一个insert buffer的对象中，后续再一额定的频率合并insert buffer到磁盘索引页。这时能将多个插入操作合并到一个操作中。使用条件：</p>
+<pre><code>- **索引是辅助索引**
+- **索引不是唯一的**（唯一的索引将导致数据库每次去判断插入记录的惟一性）</code></pre></li>
+<li><p><strong>自适应哈希索引</strong>  对某些热点页 建立哈希索引 条件：访问模式（查询条件）相同 并以该模式访问了100次或N次 n= 页中记录数*1/16</p>
+</li>
+<li><p>异步IO （操作系统AIO）</p>
+</li>
+<li><p>刷新临接页</p>
+</li>
+</ul>
+<h3 id="逻辑存储结构"><a href="#逻辑存储结构" class="headerlink" title="逻辑存储结构"></a>逻辑存储结构</h3><ul>
+<li><p><img src="/imag%5Cmysql%5CQQ%E6%88%AA%E5%9B%BE20190614184907.png" alt></p>
+<ul>
+<li><p>页 （默认大小16kb） 数据页组织都是b tree页</p>
+<p> <img src="/imag%5Cmysql%5CQQ%E6%88%AA%E5%9B%BE20190614185103.png" alt="1557281236717"></p>
+</li>
+<li><p>Row  新格式 Compact <img src="C:%5CUsers%5Czlk%5CAppData%5CLocal%5CTemp%5C1557280957605.png" alt="1557280957605"><br> <img src="C:%5CUsers%5Czlk%5CAppData%5CLocal%5CTemp%5C1557281084492.png" alt="1557281084492"></p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="索引"><a href="#索引" class="headerlink" title="索引"></a>索引</h3><ul>
+<li>支持 B+ 索引 全文索引（倒排索引 full inverted index） 哈希索引</li>
+<li>不支持位图索引</li>
+</ul>
+<p>####索引失效</p>
+<ul>
+<li><p>查询条件包含 OR 可能会失效（or左右只有一个索引字段）</p>
+</li>
+<li><p>组合索引 不使用第一列索引  （最佳左前缀法则）</p>
+</li>
+<li><p>以 Like开头，当% 在前面时。（最左匹配）</p>
+</li>
+<li><p>where中 字符串没有用引号括起来</p>
+</li>
+<li><p>当全表扫描比使用索引快时</p>
+<p>[]: <a href="https://www.jianshu.com/p/d5b2f645d657" target="_blank" rel="noopener">https://www.jianshu.com/p/d5b2f645d657</a></p>
+</li>
+</ul>
+<h4 id="PS-：位图索引"><a href="#PS-：位图索引" class="headerlink" title="PS ：位图索引"></a>PS ：位图索引</h4><p>  位图索引即用01记录该行是否包含某个值，适合AND、OR、NOT等操作，只适合只有固定的几个值的列，如性别、婚姻、行政区等。</p>
+<p>​    不适合更新频繁的列，每个位图键值中都包含多条记录，当修改一条记录会锁住其他记录。</p>
+<h3 id="锁"><a href="#锁" class="headerlink" title="锁"></a>锁</h3><ul>
+<li><p>innodb支持行级别的锁（索引加锁） 支持意向锁</p>
+<ul>
+<li><img src="/imag%5Cmysql%5CQQ%E6%88%AA%E5%9B%BE20190614185534.png" alt="1557300423839"></li>
+<li>行锁的三种算法：Record Lock 单个行记录加锁；Gap Lock 间隙锁，锁定一个范围,不包含记录本身；Next-Key Lock即 Gap Lock+Record Lock：锁定一个范围，并包含锁定记录本身</li>
+</ul>
+</li>
+</ul>
+<h3 id="事物"><a href="#事物" class="headerlink" title="事物"></a>事物</h3><ul>
+<li><p>redo 日志 :用于实现事物的持久化</p>
+<ul>
+<li>包含 内存中的日志缓冲 redo log buffer 以及 重做日志文件 redo log file </li>
+<li>重做日志是innodb存储引擎本身产生的，记录的是<strong>脏页刷新到磁盘的记录</strong>，<strong>物理记录</strong>每个页的操作。mysql上层还有个<strong>二进制日志</strong>，是一个逻辑日志，记录对应的sql语句。 </li>
+<li>程序运行期间不进行读取，都是顺序写入的。</li>
+<li><strong>doublewrite机制</strong>，和redo并不冲突，double write是为了防止脏页（16kb）刷新到磁盘时，期间发生故障，物理磁盘页遭到损坏，而不能进行redo恢复时，所采用的技术。</li>
+<li>log block 重做日志都是以512字节的进行存储的，这意味着重做日志缓存、重做日志都是以块的方式存储的，称之为重做日志块redo log block。</li>
+<li>log buffer  可设置 log buffer同步到磁盘的时机（0：一秒同步刷新一次；1：事物提交时同步刷新；2：事物结束仅刷新到系统缓冲区，由操作系统决定何时刷新）</li>
+</ul>
+</li>
+<li><p>undo </p>
+<ul>
+<li>undo记录逻辑日志，存放于数据库内部一个特殊段segment, 位于共享空间。</li>
+<li>不像redo，重做磁盘，undo并不会对磁盘的数据进行回滚操作 而是逻辑回滚，即执行一个相反的sql语句。</li>
+</ul>
+</li>
+</ul>
+<h3 id="事物隔离级别"><a href="#事物隔离级别" class="headerlink" title="事物隔离级别"></a>事物隔离级别</h3><p>InnoDB 默认级别是<strong>可重复读</strong></p>
+<p><img src="/imag%5Cmysql%5CQQ%E6%88%AA%E5%9B%BE20190614185947.png" alt></p>
+<ul>
+<li>脏读：  脏读就是指当一个事务正在访问数据，并且对数据进行了修改，而这种修改还没有提交到数据库中，这时，另外一个事务也访问这个数据，然后使用了这个数据。</li>
+<li>不可重复读： 是指在一个事务内，多次读同一数据。在这个事务还没有结束时，另外一个事务也访问该同一数据。那么，在第一个事务中的两次读数据之间，由于第二个事务的修改，那么第一个事务两次读到的的数据可能是不一样的。这样就发生了在一个事务内两次读到的数据是不一样的，因此称为是不可重复读。</li>
+<li>幻读： 第一个事务对一个表中的数据进行了修改，这种修改涉及到表中的全部数据行。同时，第二个事务也修改这个表中的数据，这种修改是向表中插入一行新数据。那么，以后就会发生操作第一个事务的用户发现表中还有没有修改的数据行，就好象发生了幻觉一样。</li>
+</ul>
+<p><strong>不可重复读和幻读的区别</strong><br>很多人容易搞混不可重复读和幻读，确实这两者有些相似。但不可重复读重点在于update和delete，而幻读的重点在于insert。</p>
+<p>如果使用锁机制来实现这两种隔离级别，在可重复读中，该sql第一次读取到数据后，就将这些数据加锁，其它事务无法修改这些数据，就可以实现可重复 读了。但这种方法却无法锁住insert的数据，所以当事务A先前读取了数据，或者修改了全部数据，事务B还是可以insert数据提交，这时事务A就会 发现莫名其妙多了一条之前没有的数据，这就是幻读，不能通过行锁来避免。需要Serializable隔离级别 ，读用读锁，写用写锁，读锁和写锁互斥，这么做可以有效的避免幻读、不可重复读、脏读等问题，但会极大的降低数据库的并发能力。</p>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/06/24/操作系统知识点/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="zlksilence">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/uploads/headpiture.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="silence">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2019/06/24/操作系统知识点/" class="post-title-link" itemprop="url">操作系统知识点</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+
+          
+          
+          
+
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-06-24 16:18:55" itemprop="dateCreated datePublished" datetime="2019-06-24T16:18:55+08:00">2019-06-24</time>
+            </span>
+          
+
+          
+            
+
+            
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-07-09 21:41:19" itemprop="dateModified" datetime="2019-07-09T21:41:19+08:00">2019-07-09</time>
+              </span>
+            
+          
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          <br>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="文件读写"><a href="#文件读写" class="headerlink" title="文件读写"></a>文件读写</h2><ul>
+<li><p>普通读写 </p>
+<p>​    进程调用读写，发起系统调用，操作系统从用户态切换至内核态，数据从磁盘读取到内核态内存空间，之后从内核空间拷贝至用户空间。</p>
+</li>
+<li><p>内存映射</p>
+<p>​    把文件映射到一段内存上，通过这段内存的读取和修改实现对文件的读取和修改。不经过内核缓冲区拷贝，速度很快。缺点：无法扩展文件，不适合小文件。</p>
+</li>
+<li><p>copy on  write</p>
+<p>​    写入时复制（英语：Copy-on-write，简称COW）是一种计算机程序设计领域的优化策略。其核心思想是，如果有多个调用者（callers）同时请求相同资源（如内存或磁盘上的数据存储），他们会共同获取相同的指针指向相同的资源，直到某个调用者试图修改资源的内容时，系统才会真正复制一份专用副本（private copy）给该调用者，而其他调用者所见到的最初的资源仍然保持不变。这过程对其他的调用者都是透明的（transparently）。此作法主要的优点是如果调用者没有修改该资源，就不会有副本（private copy）被建立，因此多个调用者只是读取操作时可以共享同一份资源。</p>
+</li>
+<li><p>零拷贝技术</p>
+<p>​    主要是避免的数据的重复传输拷贝，主要用于网络传输中。两种方式实现：内存映射和操作系统提供的senfile系统调用方法。</p>
+</li>
+</ul>
 
           
         
@@ -1876,7 +2086,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">18</span>
+                    <span class="site-state-item-count">19</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -1948,7 +2158,7 @@
                     
                       
                     
-                    <span class="site-state-item-count">15</span>
+                    <span class="site-state-item-count">17</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
