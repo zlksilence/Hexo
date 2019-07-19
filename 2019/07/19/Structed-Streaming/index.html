@@ -102,14 +102,14 @@
 <meta property="og:site_name" content="silence">
 <meta property="og:description" content="此篇主要记录自己在项目中学习使用Structed Streaming过程中遇到的问题及解决办法, 学习时间不长,不到一周,为了项目临时写的,仅供参考。关于Structured Streaming的全面介绍参考 Structed Streraming 介绍​        从Spark2.0之后,Spark Streaming开始引入一种新的流式引擎:Structed Streaming 。开发这套">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="http://yoursite.com/imag%5CSpark%5Cstructured-streaming-stream-as-a-table.png">
+<meta property="og:image" content="http://yoursite.com/imag/Spark/structured-streaming-stream-as-a-table.png">
 <meta property="og:image" content="http://yoursite.com/imag%5CSpark%5Cstructured-streaming-model.png">
 <meta property="og:image" content="http://yoursite.com/imag%5CSpark%5Cstructured-streaming-example-model.png">
-<meta property="og:updated_time" content="2019-07-19T09:38:48.651Z">
+<meta property="og:updated_time" content="2019-07-19T09:44:40.211Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Structed Streaming学习">
 <meta name="twitter:description" content="此篇主要记录自己在项目中学习使用Structed Streaming过程中遇到的问题及解决办法, 学习时间不长,不到一周,为了项目临时写的,仅供参考。关于Structured Streaming的全面介绍参考 Structed Streraming 介绍​        从Spark2.0之后,Spark Streaming开始引入一种新的流式引擎:Structed Streaming 。开发这套">
-<meta name="twitter:image" content="http://yoursite.com/imag%5CSpark%5Cstructured-streaming-stream-as-a-table.png">
+<meta name="twitter:image" content="http://yoursite.com/imag/Spark/structured-streaming-stream-as-a-table.png">
 
 
 
@@ -365,10 +365,14 @@
                 
               
 
-              <time title="创建时间：2019-07-19 17:38:48" itemprop="dateCreated datePublished" datetime="2019-07-19T17:38:48+08:00">2019-07-19</time>
+              <time title="创建时间：2019-07-19 17:38:48 / 修改时间：17:44:40" itemprop="dateCreated datePublished" datetime="2019-07-19T17:38:48+08:00">2019-07-19</time>
             </span>
           
 
+          
+            
+
+            
           
 
           
@@ -421,7 +425,7 @@
 
 <p>​    以上就是一个简单的单词统计操作程序示例,要了解其中更相信的运行原理参看后续章节.</p>
 <h2 id="重要概念"><a href="#重要概念" class="headerlink" title="重要概念"></a>重要概念</h2><h3 id="编程模型"><a href="#编程模型" class="headerlink" title="编程模型"></a>编程模型</h3><p>结构化流中的关键思想是将实时数据流视为连续追加的表。这导致新的流处理模型非常类似于批处理模型。您将流式计算表示为静态表上的标准批处理查询，Spark将其作为<em>无界</em>输入表上的<em>增量</em>查询运行。</p>
-<p><img src="/imag%5CSpark%5Cstructured-streaming-stream-as-a-table.png" alt></p>
+<p><img src="/imag/Spark/structured-streaming-stream-as-a-table.png" alt></p>
 <p>将数据流始为“输入表”，到达流的每个数据项都像一个新行被附加到输入表（当然也可以不新加而是更新表中的数据，比如聚合操作）。</p>
 <p>还可以定义触发间隔 trigger interva，每个 trigger interva将使新行追加到结果表中，结果表一旦有更新，则会根据输出模式output mode输出到外部Sink（Sink，相当外部的数据源）。</p>
 <p><img src="/imag%5CSpark%5Cstructured-streaming-model.png" alt></p>
