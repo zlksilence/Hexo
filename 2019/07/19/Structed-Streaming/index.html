@@ -94,21 +94,21 @@
 
 
 
-  <meta name="description" content="此篇主要记录自己在项目中学习使用Structed Streaming过程中遇到的问题及解决办法, 学习时间不长,不到一周,为了项目临时写的,仅供参考。关于Structured Streaming的全面介绍参考 Structed Streraming 介绍​        从Spark2.0之后,Spark Streaming开始引入一种新的流式引擎:Structed Streaming 。开发这套">
-<meta name="keywords" content="大数据,Spark,Structed Streaming">
+  <meta name="description" content="此篇主要记录自己在项目中学习使用Structed Streaming过程中遇到的问题及解决办法, 学习时间不长,不到一周,为了项目临时写的,仅供参考。关于Structured Streaming的全面介绍参考Structured Streaming 编程向导 Structed Streraming 介绍​        从Spark2.0之后,Spark Streaming开始引入一种新的流式引擎">
+<meta name="keywords" content="Spark,Structed Streaming,大数据">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Structed Streaming学习">
 <meta property="og:url" content="http://yoursite.com/2019/07/19/Structed-Streaming/index.html">
 <meta property="og:site_name" content="silence">
-<meta property="og:description" content="此篇主要记录自己在项目中学习使用Structed Streaming过程中遇到的问题及解决办法, 学习时间不长,不到一周,为了项目临时写的,仅供参考。关于Structured Streaming的全面介绍参考 Structed Streraming 介绍​        从Spark2.0之后,Spark Streaming开始引入一种新的流式引擎:Structed Streaming 。开发这套">
+<meta property="og:description" content="此篇主要记录自己在项目中学习使用Structed Streaming过程中遇到的问题及解决办法, 学习时间不长,不到一周,为了项目临时写的,仅供参考。关于Structured Streaming的全面介绍参考Structured Streaming 编程向导 Structed Streraming 介绍​        从Spark2.0之后,Spark Streaming开始引入一种新的流式引擎">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="http://yoursite.com/imag/Spark/structured-streaming-stream-as-a-table.png">
 <meta property="og:image" content="http://yoursite.com/imag/Spark/structured-streaming-model.png">
 <meta property="og:image" content="http://yoursite.com/imag/Spark/structured-streaming-example-model.png">
-<meta property="og:updated_time" content="2019-07-19T09:47:50.975Z">
+<meta property="og:updated_time" content="2019-07-20T08:42:29.694Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Structed Streaming学习">
-<meta name="twitter:description" content="此篇主要记录自己在项目中学习使用Structed Streaming过程中遇到的问题及解决办法, 学习时间不长,不到一周,为了项目临时写的,仅供参考。关于Structured Streaming的全面介绍参考 Structed Streraming 介绍​        从Spark2.0之后,Spark Streaming开始引入一种新的流式引擎:Structed Streaming 。开发这套">
+<meta name="twitter:description" content="此篇主要记录自己在项目中学习使用Structed Streaming过程中遇到的问题及解决办法, 学习时间不长,不到一周,为了项目临时写的,仅供参考。关于Structured Streaming的全面介绍参考Structured Streaming 编程向导 Structed Streraming 介绍​        从Spark2.0之后,Spark Streaming开始引入一种新的流式引擎">
 <meta name="twitter:image" content="http://yoursite.com/imag/Spark/structured-streaming-stream-as-a-table.png">
 
 
@@ -365,13 +365,23 @@
                 
               
 
-              <time title="创建时间：2019-07-19 17:38:48 / 修改时间：17:47:50" itemprop="dateCreated datePublished" datetime="2019-07-19T17:38:48+08:00">2019-07-19</time>
+              <time title="创建时间：2019-07-19 17:38:48" itemprop="dateCreated datePublished" datetime="2019-07-19T17:38:48+08:00">2019-07-19</time>
             </span>
           
 
           
             
 
+            
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-07-20 16:42:29" itemprop="dateModified" datetime="2019-07-20T16:42:29+08:00">2019-07-20</time>
+              </span>
             
           
 
@@ -407,7 +417,7 @@
       
 
       
-        <p>此篇主要记录自己在项目中学习使用Structed Streaming过程中遇到的问题及解决办法, 学习时间不长,不到一周,为了项目临时写的,仅供参考。关于Structured Streaming的全面介绍参考</p>
+        <p>此篇主要记录自己在项目中学习使用Structed Streaming过程中遇到的问题及解决办法, 学习时间不长,不到一周,为了项目临时写的,仅供参考。关于Structured Streaming的全面介绍参考<a href="https://spark.apache.org/docs/latest/structured-streaming-programming-guide.h" target="_blank" rel="noopener">Structured Streaming 编程向导</a></p>
 <h2 id="Structed-Streraming-介绍"><a href="#Structed-Streraming-介绍" class="headerlink" title="Structed Streraming 介绍"></a>Structed Streraming 介绍</h2><p>​        从Spark2.0之后,Spark Streaming开始引入一种新的流式引擎:Structed Streaming 。开发这套API的主要动因是自Spark 2.0之后，以RDD为核心的API逐步升级到Dataset/DataFrame上，而另一方面，以RDD为基础的编程模型对开发人员的要求较高，需要有足够的编程背景才能胜任Spark Streaming的编程工作，而新引入的Structured Streaming模型是把数据流当作一个没有边界的数据表来对待，这样开发人员可以在流上使用Spark SQL进行流处理，这大大降低了流计算的编程门槛。原理上看，Structed Streaming还是一个微批处理模型，数据流作为一系列小批量作业处理，从而实现低至100毫秒的端到端延迟和完全一次的容错保证。</p>
 <h2 id="使用方法"><a href="#使用方法" class="headerlink" title="使用方法"></a>使用方法</h2><p>​    一个Structed Streraming 程序运行大致分为:</p>
 <ol>
@@ -524,11 +534,11 @@
         
         <div class="post-tags">
           
-            <a href="/tags/大数据/" rel="tag"># 大数据</a>
-          
             <a href="/tags/Spark/" rel="tag"># Spark</a>
           
             <a href="/tags/Structed-Streaming/" rel="tag"># Structed Streaming</a>
+          
+            <a href="/tags/大数据/" rel="tag"># 大数据</a>
           
         </div>
       
