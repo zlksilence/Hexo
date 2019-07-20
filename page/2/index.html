@@ -314,6 +314,279 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/06/24/Mysql笔记/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="zlksilence">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/uploads/headpiture.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="silence">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2019/06/24/Mysql笔记/" class="post-title-link" itemprop="url">Mysql笔记-InnoDB存储引擎</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+
+          
+          
+          
+
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-06-24 16:18:55" itemprop="dateCreated datePublished" datetime="2019-06-24T16:18:55+08:00">2019-06-24</time>
+            </span>
+          
+
+          
+            
+
+            
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-07-20 15:19:43" itemprop="dateModified" datetime="2019-07-20T15:19:43+08:00">2019-07-20</time>
+              </span>
+            
+          
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          <br>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>​    《MySQL技术内幕:InnoDB存储引擎》</p>
+<h2 id="mysql"><a href="#mysql" class="headerlink" title="mysql"></a>mysql</h2><ul>
+<li><p>myslq存储引擎设计为插件形式可替换</p>
+<ul>
+<li>InnoDB 现在的默认引擎 支持事物</li>
+<li>MyISAM 不支持事物  以前默认引擎</li>
+<li>NDB 集群引擎</li>
+<li>Memory 数据放于内存 内存数据库</li>
+</ul>
+</li>
+<li><p>单进程多线程</p>
+</li>
+<li><p>体系结构</p>
+</li>
+<li><p><img src="/imag/mysql/20150730152113099.jpg" alt></p>
+</li>
+<li><p>连接 </p>
+<ul>
+<li>远程连接使用tcp/ip 套连接字</li>
+<li>本地 linux 使用 UNIX域套连接字，windows可以使用命名管道、或共享内存（需要配置开启）</li>
+</ul>
+</li>
+</ul>
+<h2 id="innoDB"><a href="#innoDB" class="headerlink" title="innoDB"></a>innoDB</h2><p><img src="/imag/mysql/QQ%E6%88%AA%E5%9B%BE20190614161014.png" alt></p>
+<h3 id="后台线程"><a href="#后台线程" class="headerlink" title="后台线程"></a>后台线程</h3><ul>
+<li><p>Master Thread</p>
+<p>核心线程，主要负责将缓冲区中的数据异步刷新到磁盘，保证数据的一致性，包括脏页的刷新、合并插入缓冲等</p>
+</li>
+<li><p>IO Thread</p>
+<p>包含read、write、insert buffer和log IO thread</p>
+</li>
+<li><p>Purge Thread</p>
+<p>回收已提交事物的undo log</p>
+</li>
+<li><p>Page Cleaner Thread</p>
+</li>
+</ul>
+<h3 id="内存数据对象"><a href="#内存数据对象" class="headerlink" title="内存数据对象"></a>内存数据对象</h3><p><img src="/imag/mysql/QQ%E6%88%AA%E5%9B%BE20190614163145.png" alt></p>
+<h3 id="缓冲池设计-LRU"><a href="#缓冲池设计-LRU" class="headerlink" title="缓冲池设计 LRU"></a>缓冲池设计 LRU</h3><h3 id="关键特性"><a href="#关键特性" class="headerlink" title="关键特性"></a>关键特性</h3><ul>
+<li><p><strong>doublewWrte</strong> 机制 防止部分写入失效（InnoDB刷新脏页到磁盘时，发生宕机，如16kb页只写了前4kb，因为此页已写了一部分，无法使用重做日志进行恢复）</p>
+</li>
+<li><p><strong>InsertBuffer</strong></p>
+<p>在mysql insert中，行数据的插入都是按照主键递增的顺序进行插入的。因此，插入聚集索引（Primary Key）一般是顺序的，不需要磁盘的随机读取。但不可能每张表都只有一个聚集索引，若对多个非聚集索引，叶子结点的插入不再是顺序的了，这就需要离散的访问非聚集索引页。因此，insert buffer 解决了离散访问非聚集索引的问题，其对非聚集索引的插入不是一次直接插入到索引中，而是先判断是否在插入的非聚集索引页是否在缓冲池中，若不在则放入到一个insert buffer的对象中，后续再一额定的频率合并insert buffer到磁盘索引页。这时能将多个插入操作合并到一个操作中。使用条件：</p>
+<pre><code>- **索引是辅助索引**
+- **索引不是唯一的**（唯一的索引将导致数据库每次去判断插入记录的惟一性）</code></pre></li>
+<li><p><strong>自适应哈希索引</strong>  对某些热点页 建立哈希索引 条件：访问模式（查询条件）相同 并以该模式访问了100次或N次 n= 页中记录数*1/16</p>
+</li>
+<li><p>异步IO （操作系统AIO）</p>
+</li>
+<li><p>刷新临接页</p>
+</li>
+</ul>
+<h3 id="逻辑存储结构"><a href="#逻辑存储结构" class="headerlink" title="逻辑存储结构"></a>逻辑存储结构</h3><ul>
+<li><p><img src="/imag/mysql/QQ%E6%88%AA%E5%9B%BE20190614184907.png" alt></p>
+<ul>
+<li><p>页 （默认大小16kb） 数据页组织都是b tree页</p>
+<p> <img src="/imag/mysql/QQ%E6%88%AA%E5%9B%BE20190614185103.png" alt="1557281236717"></p>
+</li>
+<li><p>Row  新格式 Compact <img src="C:/Users/zlk/AppData/Local/Temp/1557280957605.png" alt="1557280957605"><br> <img src="C:/Users/zlk/AppData/Local/Temp/1557281084492.png" alt="1557281084492"></p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="索引"><a href="#索引" class="headerlink" title="索引"></a>索引</h3><ul>
+<li>支持 B+ 索引 全文索引（倒排索引 full inverted index） 哈希索引</li>
+<li>不支持位图索引</li>
+</ul>
+<p>####索引失效</p>
+<ul>
+<li><p>查询条件包含 OR 可能会失效（or左右只有一个索引字段）</p>
+</li>
+<li><p>组合索引 不使用第一列索引  （最佳左前缀法则）</p>
+</li>
+<li><p>以 Like开头，当% 在前面时。（最左匹配）</p>
+</li>
+<li><p>where中 字符串没有用引号括起来</p>
+</li>
+<li><p>当全表扫描比使用索引快时</p>
+<p>[]: <a href="https://www.jianshu.com/p/d5b2f645d657" target="_blank" rel="noopener">https://www.jianshu.com/p/d5b2f645d657</a></p>
+</li>
+</ul>
+<h4 id="PS-：位图索引"><a href="#PS-：位图索引" class="headerlink" title="PS ：位图索引"></a>PS ：位图索引</h4><p>  位图索引即用01记录该行是否包含某个值，适合AND、OR、NOT等操作，只适合只有固定的几个值的列，如性别、婚姻、行政区等。</p>
+<p>​    不适合更新频繁的列，每个位图键值中都包含多条记录，当修改一条记录会锁住其他记录。</p>
+<h3 id="锁"><a href="#锁" class="headerlink" title="锁"></a>锁</h3><ul>
+<li><p>innodb支持行级别的锁（索引加锁） 支持意向锁</p>
+<ul>
+<li><img src="/imag/mysql/QQ%E6%88%AA%E5%9B%BE20190614185534.png" alt="1557300423839"></li>
+<li>行锁的三种算法：Record Lock 单个行记录加锁；Gap Lock 间隙锁，锁定一个范围,不包含记录本身；Next-Key Lock即 Gap Lock+Record Lock：锁定一个范围，并包含锁定记录本身</li>
+</ul>
+</li>
+</ul>
+<h3 id="事物"><a href="#事物" class="headerlink" title="事物"></a>事物</h3><ul>
+<li><p>redo 日志 :用于实现事物的持久化</p>
+<ul>
+<li>包含 内存中的日志缓冲 redo log buffer 以及 重做日志文件 redo log file </li>
+<li>重做日志是innodb存储引擎本身产生的，记录的是<strong>脏页刷新到磁盘的记录</strong>，<strong>物理记录</strong>每个页的操作。mysql上层还有个<strong>二进制日志</strong>，是一个逻辑日志，记录对应的sql语句。 </li>
+<li>程序运行期间不进行读取，都是顺序写入的。</li>
+<li><strong>doublewrite机制</strong>，和redo并不冲突，double write是为了防止脏页（16kb）刷新到磁盘时，期间发生故障，物理磁盘页遭到损坏，而不能进行redo恢复时，所采用的技术。</li>
+<li>log block 重做日志都是以512字节的进行存储的，这意味着重做日志缓存、重做日志都是以块的方式存储的，称之为重做日志块redo log block。</li>
+<li>log buffer  可设置 log buffer同步到磁盘的时机（0：一秒同步刷新一次；1：事物提交时同步刷新；2：事物结束仅刷新到系统缓冲区，由操作系统决定何时刷新）</li>
+</ul>
+</li>
+<li><p>undo </p>
+<ul>
+<li>undo记录逻辑日志，存放于数据库内部一个特殊段segment, 位于共享空间。</li>
+<li>不像redo，重做磁盘，undo并不会对磁盘的数据进行回滚操作 而是逻辑回滚，即执行一个相反的sql语句。</li>
+</ul>
+</li>
+</ul>
+<h3 id="事物隔离级别"><a href="#事物隔离级别" class="headerlink" title="事物隔离级别"></a>事物隔离级别</h3><p>InnoDB 默认级别是<strong>可重复读</strong></p>
+<p><img src="/imag/mysql/QQ%E6%88%AA%E5%9B%BE20190614185947.png" alt></p>
+<ul>
+<li>脏读：  脏读就是指当一个事务正在访问数据，并且对数据进行了修改，而这种修改还没有提交到数据库中，这时，另外一个事务也访问这个数据，然后使用了这个数据。</li>
+<li>不可重复读： 是指在一个事务内，多次读同一数据。在这个事务还没有结束时，另外一个事务也访问该同一数据。那么，在第一个事务中的两次读数据之间，由于第二个事务的修改，那么第一个事务两次读到的的数据可能是不一样的。这样就发生了在一个事务内两次读到的数据是不一样的，因此称为是不可重复读。</li>
+<li>幻读： 第一个事务对一个表中的数据进行了修改，这种修改涉及到表中的全部数据行。同时，第二个事务也修改这个表中的数据，这种修改是向表中插入一行新数据。那么，以后就会发生操作第一个事务的用户发现表中还有没有修改的数据行，就好象发生了幻觉一样。</li>
+</ul>
+<p><strong>不可重复读和幻读的区别</strong><br>很多人容易搞混不可重复读和幻读，确实这两者有些相似。但不可重复读重点在于update和delete，而幻读的重点在于insert。</p>
+<p>如果使用锁机制来实现这两种隔离级别，在可重复读中，该sql第一次读取到数据后，就将这些数据加锁，其它事务无法修改这些数据，就可以实现可重复 读了。但这种方法却无法锁住insert的数据，所以当事务A先前读取了数据，或者修改了全部数据，事务B还是可以insert数据提交，这时事务A就会 发现莫名其妙多了一条之前没有的数据，这就是幻读，不能通过行锁来避免。需要Serializable隔离级别 ，读用读锁，写用写锁，读锁和写锁互斥，这么做可以有效的避免幻读、不可重复读、脏读等问题，但会极大的降低数据库的并发能力。</p>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/06/24/Redis 笔记/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -529,7 +802,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/06/24/Mysql笔记/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/06/24/深入理解java虚拟机-笔记/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="zlksilence">
@@ -549,7 +822,7 @@
           <h1 class="post-title" itemprop="name headline">
                 
                 
-                <a href="/2019/06/24/Mysql笔记/" class="post-title-link" itemprop="url">Mysql笔记-InnoDB存储引擎</a>
+                <a href="/2019/06/24/深入理解java虚拟机-笔记/" class="post-title-link" itemprop="url">深入理解java虚拟机</a>
               
             
           </h1>
@@ -589,7 +862,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2019-07-11 21:28:55" itemprop="dateModified" datetime="2019-07-11T21:28:55+08:00">2019-07-11</time>
+                <time title="修改时间：2019-07-20 15:20:07" itemprop="dateModified" datetime="2019-07-20T15:20:07+08:00">2019-07-20</time>
               </span>
             
           
@@ -628,124 +901,259 @@
       
         
           
-            <p>​    《MySQL技术内幕:InnoDB存储引擎》</p>
-<h2 id="mysql"><a href="#mysql" class="headerlink" title="mysql"></a>mysql</h2><ul>
-<li><p>myslq存储引擎设计为插件形式可替换</p>
+            <p>个人学习笔记</p>
+<h2 id="java虚拟机运行数据区域"><a href="#java虚拟机运行数据区域" class="headerlink" title="java虚拟机运行数据区域"></a>java虚拟机运行数据区域</h2><p>方法区保存class信息和static变量 所有线程共享    </p>
+<p>堆保存对象实例，其中有指向方法区类的指针。只存有对象实体，不含有基本类型和对象引用</p>
+<p><img src="/imag/java/javaxuniji.png" alt="java 运行数据区"></p>
+<h2 id="垃圾回收"><a href="#垃圾回收" class="headerlink" title="垃圾回收"></a>垃圾回收</h2><h3 id="引用计数法"><a href="#引用计数法" class="headerlink" title="引用计数法"></a>引用计数法</h3><p>给对象中添加一个引用计数器，每当有一个地方引用时，计数器加1；引用失效时，计数器值就减1；计数器为0时，对象不在可能被使用。</p>
+<p>方法简单、高效，但存在难于解决对象之间相互循环引用（A中保留对B的引用，B中保存对A的引用）的问题。java 虚拟机并没有使用。</p>
+<h3 id="可达性分析算法"><a href="#可达性分析算法" class="headerlink" title="可达性分析算法"></a>可达性分析算法</h3><p><img src="/imag/java/gckedaxing.png" alt="gckedaxing"></p>
+<p>可作为GC ROOTs的对象：</p>
 <ul>
-<li>InnoDB 现在的默认引擎 支持事物</li>
-<li>MyISAM 不支持事物  以前默认引擎</li>
-<li>NDB 集群引擎</li>
-<li>Memory 数据放于内存 内存数据库</li>
+<li>虚拟机栈（栈帧中的本地变量表）中的引用对象</li>
+<li>方法区中的类静态属性引用对象</li>
+<li>方法区中的常量引用对象</li>
+<li>本地方法栈中的JNI引用的对象</li>
 </ul>
+<h3 id="回收算法"><a href="#回收算法" class="headerlink" title="回收算法"></a>回收算法</h3><ul>
+<li><p>标记清除</p>
 </li>
-<li><p>单进程多线程</p>
+<li><p>标记复制 </p>
+<p>内存划分为两块区域，每次内存在其中一块进行垃圾回收，将此块存活的对象复制到另一个区域内。优化：大部分对象都会在一次垃圾回收中被回收掉，所以并不需要两块内存区域对等划分。一般将内存划分为一块较大的<strong>Eden空间</strong>和<strong>两块较小的Survior空间</strong>，每次使用Eden和其中一块Survior。当回收时将存活的对象一次性复制到另一个Survior区域。HotSpot中默认Eden和Survivor的比例是8：1，所以每次新生代中可用的空间为整个新生代空间的90%。这就导致有时存活的对象有时超过10%，这时就需要老年代进行<strong>分配担保</strong></p>
 </li>
-<li><p>体系结构</p>
+<li><p>标记整理</p>
 </li>
-<li><p><img src="/imag%5Cmysql%5C20150730152113099.jpg" alt></p>
-</li>
-<li><p>连接 </p>
+</ul>
+<h3 id="分代收集算法"><a href="#分代收集算法" class="headerlink" title="分代收集算法"></a>分代收集算法</h3><p>​    即根据对象存活的周期的不同将内存划分为几块。</p>
 <ul>
-<li>远程连接使用tcp/ip 套连接字</li>
-<li>本地 linux 使用 UNIX域套连接字，windows可以使用命名管道、或共享内存（需要配置开启）</li>
-</ul>
+<li><p>新生代： 复制算法。适合对象在每次收集时都会大量死去，只有少量存活的</p>
+</li>
+<li><p>老年代：标记整理。适合对象存活率较高的、没有额外空间对其进行担保的。</p>
 </li>
 </ul>
-<h2 id="innoDB"><a href="#innoDB" class="headerlink" title="innoDB"></a>innoDB</h2><p><img src="/imag%5Cmysql%5CQQ%E6%88%AA%E5%9B%BE20190614161014.png" alt></p>
-<h3 id="后台线程"><a href="#后台线程" class="headerlink" title="后台线程"></a>后台线程</h3><ul>
-<li><p>Master Thread</p>
-<p>核心线程，主要负责将缓冲区中的数据异步刷新到磁盘，保证数据的一致性，包括脏页的刷新、合并插入缓冲等</p>
-</li>
-<li><p>IO Thread</p>
-<p>包含read、write、insert buffer和log IO thread</p>
-</li>
-<li><p>Purge Thread</p>
-<p>回收已提交事物的undo log</p>
-</li>
-<li><p>Page Cleaner Thread</p>
-</li>
+<h3 id="内存分配与回收"><a href="#内存分配与回收" class="headerlink" title="内存分配与回收"></a>内存分配与回收</h3><ul>
+<li><strong>对象优先在Eden分配</strong>，如果Eden空间不够，虚拟机则进行一次<strong>Minor GC（新生代的垃圾回收）</strong>。</li>
+<li><strong>大对象直接进入老年代</strong>。有参数：-XX：PretenureSizeThreshold 可以设置大于这个值的对象直接在老年代分配空间（避免新生代Eden和Survivor发生大量内存的复制）。</li>
+<li><strong>长期存活的对象将进入老年代</strong>。对象在Eden出生每次Minor GC都会使对象的年龄增加一次，当年龄超过一定的年龄（默认15）对象将晋升到老年代。参数-XX：MaxTenuringThreshold 设置最大年龄。</li>
+<li><strong>动态对象年龄判断</strong>。如果Survivor空间相同的年龄所有对象大小的总和大于Surivivor空间的一半，年龄大于或等于该年龄的对象就皆可以直接进入老年代无需等到年龄到达设置值。</li>
+<li><strong>空间分配担保</strong>。在发生MInor GC之前，虚拟机会检查老年代最大可用连续空间是否大于新生代所有对象总空间，如果这个条件成立则Minor GC可以确保安全，如果不成立则会继续检查老年代最大连续空间大小是否大于历次晋升到老年代对象的平均大小，如果是大于，则尝试今次那个一次Minor GC，否则进行触发一次<strong>Full GC（老年代的垃圾回收）</strong>。（主要是防止只是使用一个Survivor空间作为备份，若出现大量对象在Minor GC后仍然存活–极端所有对象都存活，就需要老年代进行分配担保）</li>
 </ul>
-<h3 id="内存数据对象"><a href="#内存数据对象" class="headerlink" title="内存数据对象"></a>内存数据对象</h3><p><img src="/imag%5Cmysql%5CQQ%E6%88%AA%E5%9B%BE20190614163145.png" alt></p>
-<h3 id="缓冲池设计-LRU"><a href="#缓冲池设计-LRU" class="headerlink" title="缓冲池设计 LRU"></a>缓冲池设计 LRU</h3><h3 id="关键特性"><a href="#关键特性" class="headerlink" title="关键特性"></a>关键特性</h3><ul>
-<li><p><strong>doublewWrte</strong> 机制 防止部分写入失效（InnoDB刷新脏页到磁盘时，发生宕机，如16kb页只写了前4kb，因为此页已写了一部分，无法使用重做日志进行恢复）</p>
-</li>
-<li><p><strong>InsertBuffer</strong></p>
-<p>在mysql insert中，行数据的插入都是按照主键递增的顺序进行插入的。因此，插入聚集索引（Primary Key）一般是顺序的，不需要磁盘的随机读取。但不可能每张表都只有一个聚集索引，若对多个非聚集索引，叶子结点的插入不再是顺序的了，这就需要离散的访问非聚集索引页。因此，insert buffer 解决了离散访问非聚集索引的问题，其对非聚集索引的插入不是一次直接插入到索引中，而是先判断是否在插入的非聚集索引页是否在缓冲池中，若不在则放入到一个insert buffer的对象中，后续再一额定的频率合并insert buffer到磁盘索引页。这时能将多个插入操作合并到一个操作中。使用条件：</p>
-<pre><code>- **索引是辅助索引**
-- **索引不是唯一的**（唯一的索引将导致数据库每次去判断插入记录的惟一性）</code></pre></li>
-<li><p><strong>自适应哈希索引</strong>  对某些热点页 建立哈希索引 条件：访问模式（查询条件）相同 并以该模式访问了100次或N次 n= 页中记录数*1/16</p>
-</li>
-<li><p>异步IO （操作系统AIO）</p>
-</li>
-<li><p>刷新临接页</p>
-</li>
-</ul>
-<h3 id="逻辑存储结构"><a href="#逻辑存储结构" class="headerlink" title="逻辑存储结构"></a>逻辑存储结构</h3><ul>
-<li><p><img src="/imag%5Cmysql%5CQQ%E6%88%AA%E5%9B%BE20190614184907.png" alt></p>
+<p>PS：</p>
+<p>Minor GS ：发生在新生代的垃圾收集操作。非常频繁。</p>
+<p>Major GC / Full GC ：发生在老年代的GC，一般比Minor GC慢10倍以上。</p>
+<p>新生代与老年代空间大小比例：1：2</p>
+<p>新生代内部Eden和Survivor 大小比例：8：1</p>
+<h3 id="垃圾回收器"><a href="#垃圾回收器" class="headerlink" title="垃圾回收器"></a>垃圾回收器</h3><p><img src="./imag/java/All-GC.jpg" alt></p>
+<h4 id="Serial"><a href="#Serial" class="headerlink" title="Serial"></a>Serial</h4><p>​    最基本最悠久垃圾收集器。单线程运行。在垃圾回收时必须暂停其他所有的工作线程直到结束。“<strong>Stop The World</strong>”。新生代采用复制算法；老年代采用标记-整理算法。</p>
+<h4 id="ParNew"><a href="#ParNew" class="headerlink" title="ParNew"></a>ParNew</h4><p>​    Serial收集器的多线程版本。</p>
+<h4 id="Parallel-Scavenge"><a href="#Parallel-Scavenge" class="headerlink" title="Parallel Scavenge"></a>Parallel Scavenge</h4><p>​    一个新生代收集器，采用复制算法。关注点在于达到一个可控制的吞吐量。“<strong>吞吐量优先</strong>”的收集器</p>
+<p>PS：吞吐量=（运行用户代码时间）/（运行用户代码时间+垃圾回收的时间）</p>
+<h4 id="Serial-Old"><a href="#Serial-Old" class="headerlink" title="Serial Old"></a>Serial Old</h4><p>​    Serial收集器的老年代版本，同时单线程收集器。</p>
+<h4 id="Parallel-Old"><a href="#Parallel-Old" class="headerlink" title="Parallel Old"></a>Parallel Old</h4><p>​    Parallel Scavenge的老年代版本</p>
+<h4 id="CMS"><a href="#CMS" class="headerlink" title="CMS"></a>CMS</h4><p>​    CMS（ConCurrent Mark Sweep）收集器一种以<strong>获取最短回收停顿时间为目标</strong>的收集器。基于<strong>标记-清除</strong>算法</p>
 <ul>
-<li><p>页 （默认大小16kb） 数据页组织都是b tree页</p>
-<p> <img src="/imag%5Cmysql%5CQQ%E6%88%AA%E5%9B%BE20190614185103.png" alt="1557281236717"></p>
-</li>
-<li><p>Row  新格式 Compact <img src="C:%5CUsers%5Czlk%5CAppData%5CLocal%5CTemp%5C1557280957605.png" alt="1557280957605"><br> <img src="C:%5CUsers%5Czlk%5CAppData%5CLocal%5CTemp%5C1557281084492.png" alt="1557281084492"></p>
-</li>
+<li>初始标记</li>
+<li>并发标记</li>
+<li>重新标记</li>
+<li>并发清除</li>
 </ul>
-</li>
-</ul>
-<h3 id="索引"><a href="#索引" class="headerlink" title="索引"></a>索引</h3><ul>
-<li>支持 B+ 索引 全文索引（倒排索引 full inverted index） 哈希索引</li>
-<li>不支持位图索引</li>
-</ul>
-<p>####索引失效</p>
+<p>初始标记和重新标记仍需要 Stop The World</p>
+<p>缺点：</p>
 <ul>
-<li><p>查询条件包含 OR 可能会失效（or左右只有一个索引字段）</p>
+<li><p>CMS收集器对CPU资源敏感</p>
 </li>
-<li><p>组合索引 不使用第一列索引  （最佳左前缀法则）</p>
+<li><p>无法处理浮动垃圾</p>
 </li>
-<li><p>以 Like开头，当% 在前面时。（最左匹配）</p>
-</li>
-<li><p>where中 字符串没有用引号括起来</p>
-</li>
-<li><p>当全表扫描比使用索引快时</p>
-<p>[]: <a href="https://www.jianshu.com/p/d5b2f645d657" target="_blank" rel="noopener">https://www.jianshu.com/p/d5b2f645d657</a></p>
+<li><p>大量空间的碎片化</p>
 </li>
 </ul>
-<h4 id="PS-：位图索引"><a href="#PS-：位图索引" class="headerlink" title="PS ：位图索引"></a>PS ：位图索引</h4><p>  位图索引即用01记录该行是否包含某个值，适合AND、OR、NOT等操作，只适合只有固定的几个值的列，如性别、婚姻、行政区等。</p>
-<p>​    不适合更新频繁的列，每个位图键值中都包含多条记录，当修改一条记录会锁住其他记录。</p>
-<h3 id="锁"><a href="#锁" class="headerlink" title="锁"></a>锁</h3><ul>
-<li><p>innodb支持行级别的锁（索引加锁） 支持意向锁</p>
+<h4 id="G1-收集器"><a href="#G1-收集器" class="headerlink" title="G1 收集器"></a>G1 收集器</h4><p>​    G!（Garbage-First）当今收集器技术发展的最前沿的成果之一。整理上是基于<strong>标记-整理</strong>算法。</p>
+<p>特点：</p>
 <ul>
-<li><img src="/imag%5Cmysql%5CQQ%E6%88%AA%E5%9B%BE20190614185534.png" alt="1557300423839"></li>
-<li>行锁的三种算法：Record Lock 单个行记录加锁；Gap Lock 间隙锁，锁定一个范围,不包含记录本身；Next-Key Lock即 Gap Lock+Record Lock：锁定一个范围，并包含锁定记录本身</li>
+<li><p>并行与并发</p>
+</li>
+<li><p>分代收集</p>
+</li>
+<li><p>空间整合</p>
+</li>
+<li><p>可预测的停顿</p>
+<p>G1将整个堆划分为多个大小相等的独立区域(Region),虽然保留新生代和老年代的概念,但新生代和老年代不再是物理隔离的了，他们都是一部分Region的集合。</p>
+<p>过程：</p>
+<ul>
+<li>初始标记</li>
+<li>并发标记</li>
+<li>最终标记</li>
+<li>筛选回收</li>
 </ul>
 </li>
 </ul>
-<h3 id="事物"><a href="#事物" class="headerlink" title="事物"></a>事物</h3><ul>
-<li><p>redo 日志 :用于实现事物的持久化</p>
-<ul>
-<li>包含 内存中的日志缓冲 redo log buffer 以及 重做日志文件 redo log file </li>
-<li>重做日志是innodb存储引擎本身产生的，记录的是<strong>脏页刷新到磁盘的记录</strong>，<strong>物理记录</strong>每个页的操作。mysql上层还有个<strong>二进制日志</strong>，是一个逻辑日志，记录对应的sql语句。 </li>
-<li>程序运行期间不进行读取，都是顺序写入的。</li>
-<li><strong>doublewrite机制</strong>，和redo并不冲突，double write是为了防止脏页（16kb）刷新到磁盘时，期间发生故障，物理磁盘页遭到损坏，而不能进行redo恢复时，所采用的技术。</li>
-<li>log block 重做日志都是以512字节的进行存储的，这意味着重做日志缓存、重做日志都是以块的方式存储的，称之为重做日志块redo log block。</li>
-<li>log buffer  可设置 log buffer同步到磁盘的时机（0：一秒同步刷新一次；1：事物提交时同步刷新；2：事物结束仅刷新到系统缓冲区，由操作系统决定何时刷新）</li>
-</ul>
-</li>
-<li><p>undo </p>
-<ul>
-<li>undo记录逻辑日志，存放于数据库内部一个特殊段segment, 位于共享空间。</li>
-<li>不像redo，重做磁盘，undo并不会对磁盘的数据进行回滚操作 而是逻辑回滚，即执行一个相反的sql语句。</li>
-</ul>
-</li>
-</ul>
-<h3 id="事物隔离级别"><a href="#事物隔离级别" class="headerlink" title="事物隔离级别"></a>事物隔离级别</h3><p>InnoDB 默认级别是<strong>可重复读</strong></p>
-<p><img src="/imag%5Cmysql%5CQQ%E6%88%AA%E5%9B%BE20190614185947.png" alt></p>
-<ul>
-<li>脏读：  脏读就是指当一个事务正在访问数据，并且对数据进行了修改，而这种修改还没有提交到数据库中，这时，另外一个事务也访问这个数据，然后使用了这个数据。</li>
-<li>不可重复读： 是指在一个事务内，多次读同一数据。在这个事务还没有结束时，另外一个事务也访问该同一数据。那么，在第一个事务中的两次读数据之间，由于第二个事务的修改，那么第一个事务两次读到的的数据可能是不一样的。这样就发生了在一个事务内两次读到的数据是不一样的，因此称为是不可重复读。</li>
-<li>幻读： 第一个事务对一个表中的数据进行了修改，这种修改涉及到表中的全部数据行。同时，第二个事务也修改这个表中的数据，这种修改是向表中插入一行新数据。那么，以后就会发生操作第一个事务的用户发现表中还有没有修改的数据行，就好象发生了幻觉一样。</li>
-</ul>
-<p><strong>不可重复读和幻读的区别</strong><br>很多人容易搞混不可重复读和幻读，确实这两者有些相似。但不可重复读重点在于update和delete，而幻读的重点在于insert。</p>
-<p>如果使用锁机制来实现这两种隔离级别，在可重复读中，该sql第一次读取到数据后，就将这些数据加锁，其它事务无法修改这些数据，就可以实现可重复 读了。但这种方法却无法锁住insert的数据，所以当事务A先前读取了数据，或者修改了全部数据，事务B还是可以insert数据提交，这时事务A就会 发现莫名其妙多了一条之前没有的数据，这就是幻读，不能通过行锁来避免。需要Serializable隔离级别 ，读用读锁，写用写锁，读锁和写锁互斥，这么做可以有效的避免幻读、不可重复读、脏读等问题，但会极大的降低数据库的并发能力。</p>
+<h2 id="JDK-命令行工具"><a href="#JDK-命令行工具" class="headerlink" title="JDK 命令行工具"></a>JDK 命令行工具</h2><h3 id="jps：虚拟机进程状况工具"><a href="#jps：虚拟机进程状况工具" class="headerlink" title="jps：虚拟机进程状况工具"></a>jps：虚拟机进程状况工具</h3><pre><code>jps -l</code></pre><h3 id="jstat：虚拟机统计信息监视工具"><a href="#jstat：虚拟机统计信息监视工具" class="headerlink" title="jstat：虚拟机统计信息监视工具"></a>jstat：虚拟机统计信息监视工具</h3><pre><code>jstat -gc 2764 250 20</code></pre><h3 id="jinfo：Java-配置信息工具"><a href="#jinfo：Java-配置信息工具" class="headerlink" title="jinfo：Java 配置信息工具"></a>jinfo：Java 配置信息工具</h3><h3 id="jmap：Java内存映射工具"><a href="#jmap：Java内存映射工具" class="headerlink" title="jmap：Java内存映射工具"></a>jmap：Java内存映射工具</h3><h3 id="jhat：虚拟机堆转储快照分析工具"><a href="#jhat：虚拟机堆转储快照分析工具" class="headerlink" title="jhat：虚拟机堆转储快照分析工具"></a>jhat：虚拟机堆转储快照分析工具</h3><h3 id="jstack：Java堆栈跟踪工具"><a href="#jstack：Java堆栈跟踪工具" class="headerlink" title="jstack：Java堆栈跟踪工具"></a>jstack：Java堆栈跟踪工具</h3>
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/06/24/UML图/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="zlksilence">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/uploads/headpiture.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="silence">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2019/06/24/UML图/" class="post-title-link" itemprop="url">UML图</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+
+          
+          
+          
+
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-06-24 16:18:55" itemprop="dateCreated datePublished" datetime="2019-06-24T16:18:55+08:00">2019-06-24</time>
+            </span>
+          
+
+          
+            
+
+            
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-07-20 15:25:48" itemprop="dateModified" datetime="2019-07-20T15:25:48+08:00">2019-07-20</time>
+              </span>
+            
+          
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          <br>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>##UML</p>
+<p><img src="/imag/class/lei.png" alt></p>
+<p>可见性  名称:类型 [ = 默认值 ] </p>
+<p>可见性  名称(参数列表) [ : 返回类型] </p>
+<p>private,public 和protected,在类图中分别用符号-、+和#表示 </p>
+<h2 id="泛化关系-即继承"><a href="#泛化关系-即继承" class="headerlink" title="泛化关系 即继承"></a>泛化关系 即继承</h2><p><img src="/imag/class/jicheng.png" alt="jicheng"></p>
+<h2 id="实现关系"><a href="#实现关系" class="headerlink" title="实现关系"></a>实现关系</h2><p><img src="/imag/class/shixian.png" alt="shixian"></p>
+<h2 id="依赖关系-（返回类型、形参、局部变量都可构成依赖）"><a href="#依赖关系-（返回类型、形参、局部变量都可构成依赖）" class="headerlink" title="依赖关系  （返回类型、形参、局部变量都可构成依赖）"></a>依赖关系  （返回类型、形参、局部变量都可构成依赖）</h2><p><img src="/imag/class/yilai.png" alt="yilai"></p>
+<h2 id="关联-即拥有关系"><a href="#关联-即拥有关系" class="headerlink" title="关联 即拥有关系"></a>关联 即拥有关系</h2><p><img src="/imag/class/guanlian.png" alt="guanlian"></p>
+<h2 id="聚合-关联关系的一种-强关联关系"><a href="#聚合-关联关系的一种-强关联关系" class="headerlink" title="聚合   关联关系的一种 强关联关系"></a>聚合   关联关系的一种 强关联关系</h2><p><img src="/imag/class/juihe.png" alt="juihe"></p>
+<h2 id="组合"><a href="#组合" class="headerlink" title="组合"></a>组合</h2><p><img src="/imag/class/zuhe.png" alt="zuhe"></p>
+<h2 id="完整类图"><a href="#完整类图" class="headerlink" title="完整类图"></a>完整类图</h2><p><img src="/imag/class/wanzheng.png" alt="wanzheng"></p>
 
           
         
@@ -905,342 +1313,6 @@
 <h2 id="scp-：ssh传输文件"><a href="#scp-：ssh传输文件" class="headerlink" title="scp ：ssh传输文件"></a>scp ：ssh传输文件</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">downlode from server</span></span><br><span class="line">scp username@servername:/path/filename tmp.local_destination</span><br><span class="line"><span class="meta">#</span><span class="bash">uplode to server</span></span><br><span class="line">scp /path/local_filename username@servername:/path</span><br><span class="line"><span class="meta">#</span><span class="bash">filefold</span></span><br><span class="line">scp -r ~</span><br><span class="line"><span class="meta">#</span><span class="bash">username@servername can be host name</span></span><br></pre></td></tr></table></figure>
 
 <p>###参开文献</p>
-
-          
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-      
-    
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/06/24/操作系统知识点/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="zlksilence">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/uploads/headpiture.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="silence">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                
-                <a href="/2019/06/24/操作系统知识点/" class="post-title-link" itemprop="url">操作系统知识点</a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-
-          
-          
-          
-
-          
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-
-              
-                
-              
-
-              <time title="创建时间：2019-06-24 16:18:55" itemprop="dateCreated datePublished" datetime="2019-06-24T16:18:55+08:00">2019-06-24</time>
-            </span>
-          
-
-          
-            
-
-            
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">更新于</span>
-                
-                <time title="修改时间：2019-07-09 21:41:19" itemprop="dateModified" datetime="2019-07-09T21:41:19+08:00">2019-07-09</time>
-              </span>
-            
-          
-
-          
-
-          
-            
-            
-          
-
-          
-          
-
-          
-
-          <br>
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="文件读写"><a href="#文件读写" class="headerlink" title="文件读写"></a>文件读写</h2><ul>
-<li><p>普通读写 </p>
-<p>​    进程调用读写，发起系统调用，操作系统从用户态切换至内核态，数据从磁盘读取到内核态内存空间，之后从内核空间拷贝至用户空间。</p>
-</li>
-<li><p>内存映射</p>
-<p>​    把文件映射到一段内存上，通过这段内存的读取和修改实现对文件的读取和修改。不经过内核缓冲区拷贝，速度很快。缺点：无法扩展文件，不适合小文件。</p>
-</li>
-<li><p>copy on  write</p>
-<p>​    写入时复制（英语：Copy-on-write，简称COW）是一种计算机程序设计领域的优化策略。其核心思想是，如果有多个调用者（callers）同时请求相同资源（如内存或磁盘上的数据存储），他们会共同获取相同的指针指向相同的资源，直到某个调用者试图修改资源的内容时，系统才会真正复制一份专用副本（private copy）给该调用者，而其他调用者所见到的最初的资源仍然保持不变。这过程对其他的调用者都是透明的（transparently）。此作法主要的优点是如果调用者没有修改该资源，就不会有副本（private copy）被建立，因此多个调用者只是读取操作时可以共享同一份资源。</p>
-</li>
-<li><p>零拷贝技术</p>
-<p>​    主要是避免的数据的重复传输拷贝，主要用于网络传输中。两种方式实现：内存映射和操作系统提供的senfile系统调用方法。</p>
-</li>
-</ul>
-
-          
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-      
-    
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/06/24/imag/class/UML图/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="zlksilence">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/uploads/headpiture.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="silence">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                
-                <a href="/2019/06/24/imag/class/UML图/" class="post-title-link" itemprop="url">UML图</a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-
-          
-          
-          
-
-          
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-
-              
-                
-              
-
-              <time title="创建时间：2019-06-24 16:18:55" itemprop="dateCreated datePublished" datetime="2019-06-24T16:18:55+08:00">2019-06-24</time>
-            </span>
-          
-
-          
-            
-
-            
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">更新于</span>
-                
-                <time title="修改时间：2019-07-09 21:44:13" itemprop="dateModified" datetime="2019-07-09T21:44:13+08:00">2019-07-09</time>
-              </span>
-            
-          
-
-          
-
-          
-            
-            
-          
-
-          
-          
-
-          
-
-          <br>
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>##</p>
-<p><img src="/imag%5Cclass%5Clei.png" alt="lei"></p>
-<p>可见性  名称:类型 [ = 默认值 ] </p>
-<p>可见性  名称(参数列表) [ : 返回类型] </p>
-<p>private,public 和protected,在类图中分别用符号-、+和#表示 </p>
-<h2 id="泛化关系-即继承"><a href="#泛化关系-即继承" class="headerlink" title="泛化关系 即继承"></a>泛化关系 即继承</h2><p><img src="/imag%5Cclass%5Cjicheng.png" alt="jicheng"></p>
-<h2 id="实现关系"><a href="#实现关系" class="headerlink" title="实现关系"></a>实现关系</h2><p><img src="/imag%5Cclass%5Cshixian.png" alt="shixian"></p>
-<h2 id="依赖关系-（返回类型、形参、局部变量都可构成依赖）"><a href="#依赖关系-（返回类型、形参、局部变量都可构成依赖）" class="headerlink" title="依赖关系  （返回类型、形参、局部变量都可构成依赖）"></a>依赖关系  （返回类型、形参、局部变量都可构成依赖）</h2><p><img src="/imag%5Cclass%5Cyilai.png" alt="yilai"></p>
-<h2 id="关联-即拥有关系"><a href="#关联-即拥有关系" class="headerlink" title="关联 即拥有关系"></a>关联 即拥有关系</h2><p><img src="/imag%5Cclass%5Cguanlian.png" alt="guanlian"></p>
-<h2 id="聚合-关联关系的一种-强关联关系"><a href="#聚合-关联关系的一种-强关联关系" class="headerlink" title="聚合   关联关系的一种 强关联关系"></a>聚合   关联关系的一种 强关联关系</h2><p><img src="/imag%5Cclass%5Cjuihe.png" alt="juihe"></p>
-<h2 id="组合"><a href="#组合" class="headerlink" title="组合"></a>组合</h2><p><img src="/imag%5Cclass%5Czuhe.png" alt="zuhe"></p>
-<h2 id="完整类图"><a href="#完整类图" class="headerlink" title="完整类图"></a>完整类图</h2><p><img src="/imag%5Cclass%5Cwanzheng.png" alt="wanzheng"></p>
 
           
         
@@ -1702,7 +1774,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2019-07-09 21:33:19" itemprop="dateModified" datetime="2019-07-09T21:33:19+08:00">2019-07-09</time>
+                <time title="修改时间：2019-07-20 15:18:10" itemprop="dateModified" datetime="2019-07-20T15:18:10+08:00">2019-07-20</time>
               </span>
             
           
@@ -1765,17 +1837,17 @@
 <p>在原空间位置 1001 &amp; （n-1）= 0001 &amp; 0111 = 0001</p>
 <p>在新空间位置 1001 &amp; （n&lt;&lt;1 -1）= 1001 &amp; 1111 = 1001 = 0001 + 1000</p>
 <p>即只需判断 hash &amp; n ==0 即可判断出元素在新空间的位置</p>
-<p><img src="/imag%5Cjava%5C15166327271293.jpg" alt></p>
+<p><img src="/imag/java/15166327271293.jpg" alt></p>
 <h3 id="LinkHashMap"><a href="#LinkHashMap" class="headerlink" title="LinkHashMap"></a>LinkHashMap</h3><p>继承HashMap，原HashMap节点增加前后指针形成双向链表。</p>
-<p><img src="/imag%5Cjava%5C15166338955699.jpg" alt></p>
+<p><img src="/imag/java/15166338955699.jpg" alt></p>
 <p>LinkHashMap的继承体系：</p>
-<p><img src="/imag%5Cjava%5C15166377647704.jpg" alt></p>
+<p><img src="/imag/java/15166377647704.jpg" alt></p>
 <p>LinkHashMap  重写了HashMap的 new Node() 方法。在new Node（） 建立了双向链表。</p>
 <p>其中也有 removeEldestEntry 方法 用户可以重写 用于实现自定义的缓存策略。</p>
 <h3 id="HashTable"><a href="#HashTable" class="headerlink" title="HashTable"></a>HashTable</h3><p>线程安全的HashMap，每个方法都加了 </p>
 <p>###ConcurrentMap</p>
 <p>分段加锁</p>
-<p><img src="/imag%5Cjava%5C5621908-77efbdbf6c79fac9.webp" alt></p>
+<p><img src="/imag/java/5621908-77efbdbf6c79fac9.webp" alt></p>
 <p>###TreeMap</p>
 <p>实现由 SortMap接口，红黑树的java实现版</p>
 <h2 id="List"><a href="#List" class="headerlink" title="List"></a>List</h2><h3 id="List-1"><a href="#List-1" class="headerlink" title="List"></a>List</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">List</span>&lt;<span class="title">E</span>&gt; <span class="keyword">extends</span> <span class="title">Collection</span>&lt;<span class="title">E</span>&gt; </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">size</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">isEmpty</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">contains</span><span class="params">(Object o)</span></span>;</span><br><span class="line">    <span class="function">Iterator&lt;E&gt; <span class="title">iterator</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">add</span><span class="params">(E e)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">remove</span><span class="params">(Object o)</span></span>;</span><br><span class="line">    <span class="function">E <span class="title">get</span><span class="params">(<span class="keyword">int</span> index)</span></span>;</span><br><span class="line">    <span class="function">E <span class="title">set</span><span class="params">(<span class="keyword">int</span> index, E element)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">indexOf</span><span class="params">(Object o)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">lastIndexOf</span><span class="params">(Object o)</span></span>;</span><br><span class="line">    <span class="function">ListIterator&lt;E&gt; <span class="title">listIterator</span><span class="params">()</span></span>;</span><br><span class="line">  	<span class="function"><span class="keyword">boolean</span> <span class="title">containsAll</span><span class="params">(Collection&lt;?&gt; c)</span></span>;</span><br><span class="line"> 	<span class="function"><span class="keyword">default</span> <span class="keyword">void</span> <span class="title">sort</span><span class="params">(Comparator&lt;? <span class="keyword">super</span> E&gt; c)</span> </span>&#123;</span><br><span class="line">		...</span><br><span class="line">    &#125;</span><br><span class="line">	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -1787,8 +1859,8 @@
 <h3 id="CopyOnWriteArrayList"><a href="#CopyOnWriteArrayList" class="headerlink" title="CopyOnWriteArrayList"></a>CopyOnWriteArrayList</h3><p>​    线程安全；</p>
 <p>​    CopyOnWrite： 写时复制，计算机中对内存的修改并不再原来的内存块中直接修改，而是将内存拷贝一份，在新内存处修改，而后将原内存指针指向新的内存。linux下 父进程创建子进程，子进程开始和父进程共享内存数据，当子进程要修改时子进程才复制一份父进程的数据。</p>
 <p>​    此处 CopyOnWriteArrayList，写时复制，加锁。读不加锁。</p>
-<h3 id="LinkedList"><a href="#LinkedList" class="headerlink" title="LinkedList"></a>LinkedList</h3><h2 id="Stack"><a href="#Stack" class="headerlink" title="Stack"></a>Stack</h2><h2 id="Deque-ArrayDeque-LinkedList"><a href="#Deque-ArrayDeque-LinkedList" class="headerlink" title="Deque ArrayDeque LinkedList"></a>Deque ArrayDeque LinkedList</h2><h2 id="Map-List-Set-Queue"><a href="#Map-List-Set-Queue" class="headerlink" title="Map List Set Queue"></a>Map List Set Queue</h2><p><img src="/imag%5Cjava%5C20141217105653250.jpg" alt></p>
-<p><img src="/imag%5Cjava%5C20141217105713046.jpg" alt></p>
+<h3 id="LinkedList"><a href="#LinkedList" class="headerlink" title="LinkedList"></a>LinkedList</h3><h2 id="Stack"><a href="#Stack" class="headerlink" title="Stack"></a>Stack</h2><h2 id="Deque-ArrayDeque-LinkedList"><a href="#Deque-ArrayDeque-LinkedList" class="headerlink" title="Deque ArrayDeque LinkedList"></a>Deque ArrayDeque LinkedList</h2><h2 id="Map-List-Set-Queue"><a href="#Map-List-Set-Queue" class="headerlink" title="Map List Set Queue"></a>Map List Set Queue</h2><p><img src="/imag/java/20141217105653250.jpg" alt></p>
+<p><img src="/imag/java/20141217105713046.jpg" alt></p>
 <h2 id="HashCode"><a href="#HashCode" class="headerlink" title="HashCode"></a>HashCode</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">如何写HashCode</span><br><span class="line">HashMap底层对象Hash只是对对象的存储地址做Hash。有时我们需要自己写HashCode和Equals（两者一般一起重写），参考写法：</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">hashCode</span><span class="params">()</span> </span>&#123;</span><br><span class="line"> <span class="comment">// 初始值为一个非零数</span></span><br><span class="line">    <span class="keyword">int</span> result = <span class="number">17</span>;</span><br><span class="line">	</span><br><span class="line">    <span class="comment">// 为每个成员变量计算值</span></span><br><span class="line">    result = <span class="number">31</span> * result + (booleanField ? <span class="number">1</span> : <span class="number">0</span>);</span><br><span class="line">    result = <span class="number">31</span> * result + byteField;</span><br><span class="line">    result = <span class="number">31</span> * result + charField;</span><br><span class="line">    result = <span class="number">31</span> * result + shortField;</span><br><span class="line">    result = <span class="number">31</span> * result + intField;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">equals</span><span class="params">(Object o)</span> </span>&#123;</span><br><span class="line">      <span class="comment">// 1 相当于hashcode相等，具有相同的散列数</span></span><br><span class="line">      <span class="keyword">if</span> (<span class="keyword">this</span> == o) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">      &#125;</span><br><span class="line">     <span class="comment">// 2 如果另一个对象不是当着的class类型，那必然是不相等的</span></span><br><span class="line">      <span class="keyword">if</span> (!(o <span class="keyword">instanceof</span> MyType)) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">     <span class="comment">// 3 判断对象的私有成员是否相等。</span></span><br><span class="line">     MyType lhs = (MyType) o;</span><br><span class="line">     <span class="keyword">return</span> primitiveField == lhs.primitiveField &amp;&amp;</span><br><span class="line">            referenceField.equals(lhs.referenceField) &amp;&amp;</span><br><span class="line">            (nullableField == <span class="keyword">null</span> ? lhs.nullableField == <span class="keyword">null</span></span><br><span class="line">                                  : nullableField.equals(lhs.nullableField));   &#125;</span><br></pre></td></tr></table></figure>
 
 <h2 id="Integer"><a href="#Integer" class="headerlink" title="Integer"></a>Integer</h2><p>​    final  修饰不能修改。</p>

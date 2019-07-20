@@ -102,17 +102,17 @@
 <meta property="og:site_name" content="silence">
 <meta property="og:description" content="String非可变对象 线程安全 因为String的任何操作都会产生一个新的String对象。 多个String对象 都包含相同的字符串序列，那么这些String对象都将映射到同一块内存区域（常量区），默认的hashCode（）也相同 不可被继承StringBuffer StringBuilder-都是 final 类, 都不允许被继承; -String 长度是不可变的, StringBuffer">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="http://yoursite.com/imag%5Cjava%5C15166327271293.jpg">
-<meta property="og:image" content="http://yoursite.com/imag%5Cjava%5C15166338955699.jpg">
-<meta property="og:image" content="http://yoursite.com/imag%5Cjava%5C15166377647704.jpg">
-<meta property="og:image" content="http://yoursite.com/imag%5Cjava%5C5621908-77efbdbf6c79fac9.webp">
-<meta property="og:image" content="http://yoursite.com/imag%5Cjava%5C20141217105653250.jpg">
-<meta property="og:image" content="http://yoursite.com/imag%5Cjava%5C20141217105713046.jpg">
-<meta property="og:updated_time" content="2019-07-09T13:33:19.820Z">
+<meta property="og:image" content="http://yoursite.com/imag/java/15166327271293.jpg">
+<meta property="og:image" content="http://yoursite.com/imag/java/15166338955699.jpg">
+<meta property="og:image" content="http://yoursite.com/imag/java/15166377647704.jpg">
+<meta property="og:image" content="http://yoursite.com/imag/java/5621908-77efbdbf6c79fac9.webp">
+<meta property="og:image" content="http://yoursite.com/imag/java/20141217105653250.jpg">
+<meta property="og:image" content="http://yoursite.com/imag/java/20141217105713046.jpg">
+<meta property="og:updated_time" content="2019-07-20T07:18:10.349Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Java 笔记（一）集合">
 <meta name="twitter:description" content="String非可变对象 线程安全 因为String的任何操作都会产生一个新的String对象。 多个String对象 都包含相同的字符串序列，那么这些String对象都将映射到同一块内存区域（常量区），默认的hashCode（）也相同 不可被继承StringBuffer StringBuilder-都是 final 类, 都不允许被继承; -String 长度是不可变的, StringBuffer">
-<meta name="twitter:image" content="http://yoursite.com/imag%5Cjava%5C15166327271293.jpg">
+<meta name="twitter:image" content="http://yoursite.com/imag/java/15166327271293.jpg">
 
 
 
@@ -383,7 +383,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2019-07-09 21:33:19" itemprop="dateModified" datetime="2019-07-09T21:33:19+08:00">2019-07-09</time>
+                <time title="修改时间：2019-07-20 15:18:10" itemprop="dateModified" datetime="2019-07-20T15:18:10+08:00">2019-07-20</time>
               </span>
             
           
@@ -444,17 +444,17 @@
 <p>在原空间位置 1001 &amp; （n-1）= 0001 &amp; 0111 = 0001</p>
 <p>在新空间位置 1001 &amp; （n&lt;&lt;1 -1）= 1001 &amp; 1111 = 1001 = 0001 + 1000</p>
 <p>即只需判断 hash &amp; n ==0 即可判断出元素在新空间的位置</p>
-<p><img src="/imag%5Cjava%5C15166327271293.jpg" alt></p>
+<p><img src="/imag/java/15166327271293.jpg" alt></p>
 <h3 id="LinkHashMap"><a href="#LinkHashMap" class="headerlink" title="LinkHashMap"></a>LinkHashMap</h3><p>继承HashMap，原HashMap节点增加前后指针形成双向链表。</p>
-<p><img src="/imag%5Cjava%5C15166338955699.jpg" alt></p>
+<p><img src="/imag/java/15166338955699.jpg" alt></p>
 <p>LinkHashMap的继承体系：</p>
-<p><img src="/imag%5Cjava%5C15166377647704.jpg" alt></p>
+<p><img src="/imag/java/15166377647704.jpg" alt></p>
 <p>LinkHashMap  重写了HashMap的 new Node() 方法。在new Node（） 建立了双向链表。</p>
 <p>其中也有 removeEldestEntry 方法 用户可以重写 用于实现自定义的缓存策略。</p>
 <h3 id="HashTable"><a href="#HashTable" class="headerlink" title="HashTable"></a>HashTable</h3><p>线程安全的HashMap，每个方法都加了 </p>
 <p>###ConcurrentMap</p>
 <p>分段加锁</p>
-<p><img src="/imag%5Cjava%5C5621908-77efbdbf6c79fac9.webp" alt></p>
+<p><img src="/imag/java/5621908-77efbdbf6c79fac9.webp" alt></p>
 <p>###TreeMap</p>
 <p>实现由 SortMap接口，红黑树的java实现版</p>
 <h2 id="List"><a href="#List" class="headerlink" title="List"></a>List</h2><h3 id="List-1"><a href="#List-1" class="headerlink" title="List"></a>List</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">List</span>&lt;<span class="title">E</span>&gt; <span class="keyword">extends</span> <span class="title">Collection</span>&lt;<span class="title">E</span>&gt; </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">size</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">isEmpty</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">contains</span><span class="params">(Object o)</span></span>;</span><br><span class="line">    <span class="function">Iterator&lt;E&gt; <span class="title">iterator</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">add</span><span class="params">(E e)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">remove</span><span class="params">(Object o)</span></span>;</span><br><span class="line">    <span class="function">E <span class="title">get</span><span class="params">(<span class="keyword">int</span> index)</span></span>;</span><br><span class="line">    <span class="function">E <span class="title">set</span><span class="params">(<span class="keyword">int</span> index, E element)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">indexOf</span><span class="params">(Object o)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">lastIndexOf</span><span class="params">(Object o)</span></span>;</span><br><span class="line">    <span class="function">ListIterator&lt;E&gt; <span class="title">listIterator</span><span class="params">()</span></span>;</span><br><span class="line">  	<span class="function"><span class="keyword">boolean</span> <span class="title">containsAll</span><span class="params">(Collection&lt;?&gt; c)</span></span>;</span><br><span class="line"> 	<span class="function"><span class="keyword">default</span> <span class="keyword">void</span> <span class="title">sort</span><span class="params">(Comparator&lt;? <span class="keyword">super</span> E&gt; c)</span> </span>&#123;</span><br><span class="line">		...</span><br><span class="line">    &#125;</span><br><span class="line">	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -466,8 +466,8 @@
 <h3 id="CopyOnWriteArrayList"><a href="#CopyOnWriteArrayList" class="headerlink" title="CopyOnWriteArrayList"></a>CopyOnWriteArrayList</h3><p>​    线程安全；</p>
 <p>​    CopyOnWrite： 写时复制，计算机中对内存的修改并不再原来的内存块中直接修改，而是将内存拷贝一份，在新内存处修改，而后将原内存指针指向新的内存。linux下 父进程创建子进程，子进程开始和父进程共享内存数据，当子进程要修改时子进程才复制一份父进程的数据。</p>
 <p>​    此处 CopyOnWriteArrayList，写时复制，加锁。读不加锁。</p>
-<h3 id="LinkedList"><a href="#LinkedList" class="headerlink" title="LinkedList"></a>LinkedList</h3><h2 id="Stack"><a href="#Stack" class="headerlink" title="Stack"></a>Stack</h2><h2 id="Deque-ArrayDeque-LinkedList"><a href="#Deque-ArrayDeque-LinkedList" class="headerlink" title="Deque ArrayDeque LinkedList"></a>Deque ArrayDeque LinkedList</h2><h2 id="Map-List-Set-Queue"><a href="#Map-List-Set-Queue" class="headerlink" title="Map List Set Queue"></a>Map List Set Queue</h2><p><img src="/imag%5Cjava%5C20141217105653250.jpg" alt></p>
-<p><img src="/imag%5Cjava%5C20141217105713046.jpg" alt></p>
+<h3 id="LinkedList"><a href="#LinkedList" class="headerlink" title="LinkedList"></a>LinkedList</h3><h2 id="Stack"><a href="#Stack" class="headerlink" title="Stack"></a>Stack</h2><h2 id="Deque-ArrayDeque-LinkedList"><a href="#Deque-ArrayDeque-LinkedList" class="headerlink" title="Deque ArrayDeque LinkedList"></a>Deque ArrayDeque LinkedList</h2><h2 id="Map-List-Set-Queue"><a href="#Map-List-Set-Queue" class="headerlink" title="Map List Set Queue"></a>Map List Set Queue</h2><p><img src="/imag/java/20141217105653250.jpg" alt></p>
+<p><img src="/imag/java/20141217105713046.jpg" alt></p>
 <h2 id="HashCode"><a href="#HashCode" class="headerlink" title="HashCode"></a>HashCode</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">如何写HashCode</span><br><span class="line">HashMap底层对象Hash只是对对象的存储地址做Hash。有时我们需要自己写HashCode和Equals（两者一般一起重写），参考写法：</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">hashCode</span><span class="params">()</span> </span>&#123;</span><br><span class="line"> <span class="comment">// 初始值为一个非零数</span></span><br><span class="line">    <span class="keyword">int</span> result = <span class="number">17</span>;</span><br><span class="line">	</span><br><span class="line">    <span class="comment">// 为每个成员变量计算值</span></span><br><span class="line">    result = <span class="number">31</span> * result + (booleanField ? <span class="number">1</span> : <span class="number">0</span>);</span><br><span class="line">    result = <span class="number">31</span> * result + byteField;</span><br><span class="line">    result = <span class="number">31</span> * result + charField;</span><br><span class="line">    result = <span class="number">31</span> * result + shortField;</span><br><span class="line">    result = <span class="number">31</span> * result + intField;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">equals</span><span class="params">(Object o)</span> </span>&#123;</span><br><span class="line">      <span class="comment">// 1 相当于hashcode相等，具有相同的散列数</span></span><br><span class="line">      <span class="keyword">if</span> (<span class="keyword">this</span> == o) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">      &#125;</span><br><span class="line">     <span class="comment">// 2 如果另一个对象不是当着的class类型，那必然是不相等的</span></span><br><span class="line">      <span class="keyword">if</span> (!(o <span class="keyword">instanceof</span> MyType)) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">     <span class="comment">// 3 判断对象的私有成员是否相等。</span></span><br><span class="line">     MyType lhs = (MyType) o;</span><br><span class="line">     <span class="keyword">return</span> primitiveField == lhs.primitiveField &amp;&amp;</span><br><span class="line">            referenceField.equals(lhs.referenceField) &amp;&amp;</span><br><span class="line">            (nullableField == <span class="keyword">null</span> ? lhs.nullableField == <span class="keyword">null</span></span><br><span class="line">                                  : nullableField.equals(lhs.nullableField));   &#125;</span><br></pre></td></tr></table></figure>
 
 <h2 id="Integer"><a href="#Integer" class="headerlink" title="Integer"></a>Integer</h2><p>​    final  修饰不能修改。</p>
