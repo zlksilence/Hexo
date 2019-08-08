@@ -314,347 +314,6 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/06/24/hadoop 安装指南/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="zlksilence">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/uploads/headpiture.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="silence">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                
-                <a href="/2019/06/24/hadoop 安装指南/" class="post-title-link" itemprop="url">hadoop 安装指南</a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-
-          
-          
-          
-
-          
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-
-              
-                
-              
-
-              <time title="创建时间：2019-06-24 16:18:55" itemprop="dateCreated datePublished" datetime="2019-06-24T16:18:55+08:00">2019-06-24</time>
-            </span>
-          
-
-          
-            
-
-            
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">更新于</span>
-                
-                <time title="修改时间：2019-07-20 15:17:37" itemprop="dateModified" datetime="2019-07-20T15:17:37+08:00">2019-07-20</time>
-              </span>
-            
-          
-
-          
-
-          
-            
-            
-          
-
-          
-          
-
-          
-
-          <br>
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="下载"><a href="#下载" class="headerlink" title="下载"></a>下载</h2><p><a href="https://archive.apache.org/dist/hadoop/core/hadoop-1.2.1/hadoop-1.2.1.tar.gz" target="_blank" rel="noopener">https://archive.apache.org/dist/hadoop/core/hadoop-1.2.1/hadoop-1.2.1.tar.gz</a></p>
-<h2 id="配置集群间免密登录"><a href="#配置集群间免密登录" class="headerlink" title="配置集群间免密登录"></a>配置集群间免密登录</h2><p>192.168.0.201   master<br>192.168.0.202   worker2<br>192.168.0.203   worker3</p>
-<h2 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h2><p>修改conf/core-site.xml</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">name</span>&gt;</span>hadoop.tmp.dir<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">value</span>&gt;</span>/opt/hadoop_dir/tmp<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!-- file system properties --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">name</span>&gt;</span>fs.default.name<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">value</span>&gt;</span>hdfs://192.168.0.201:49000<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">name</span>&gt;</span>fs.checkpoint.dir<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">value</span>&gt;</span>/opt/hadoop_dir/dfs/namesecondary<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>1）fs.default.name是NameNode的URI。hdfs://主机名:端口/<br>2）hadoop.tmp.dir ：Hadoop的默认临时路径，这个最好配置，如果在新增节点或者其他情况下莫名其妙的DataNode启动不了，就删除此文件中的tmp目录即可。不过如果删除了NameNode机器的此目录，那么就需要重新执行NameNode格式化的命令。</p>
-<p>修改conf/mapred-site.xml</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line">       <span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">name</span>&gt;</span>mapred.job.tracker<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">value</span>&gt;</span>192.168.0.201:49001<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">name</span>&gt;</span>mapred.local.dir<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">value</span>&gt;</span>/opt/hadoop_dir/var<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">name</span>&gt;</span>mapreduce.jobhistory.intermediate-done-dir<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">value</span>&gt;</span>/opt/hadoop_dir/mr-history/tmp<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">name</span>&gt;</span>mapreduce.jobhistory.done-dir<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">value</span>&gt;</span>/opt/hadoop_dir/mr-history/done<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>修改conf/hdfs-site.xml</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">name</span>&gt;</span>dfs.name.dir<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">value</span>&gt;</span>/opt/hadoop_dir/namenode<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">description</span>&gt;</span>name node dir<span class="tag">&lt;/<span class="name">description</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">name</span>&gt;</span>dfs.data.dir<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">value</span>&gt;</span>/opt/hadoop_dir/datanode<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">description</span>&gt;</span><span class="tag">&lt;/<span class="name">description</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">name</span>&gt;</span>dfs.permissions<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">value</span>&gt;</span>false<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">name</span>&gt;</span>dfs.replication<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">value</span>&gt;</span>1<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>1）   dfs.name.dir是NameNode持久存储名字空间及事务日志的本地文件系统路径。 当这个值是一个逗号分割的目录列表时，nametable数据将会被复制到所有目录中做冗余备份。  2）   dfs.data.dir是DataNode存放块数据的本地文件系统路径，逗号分割的列表。 当这个值是逗号分割的目录列表时，数据将被存储在所有目录下，通常分布在不同设备上。  3）dfs.replication是数据需要备份的数量，默认是3，如果此数大于集群的机器数会出错。 </p>
-<p>编辑conf/master<br>master</p>
-<p>编辑conf/slaver<br>worker2<br>worker3</p>
-<p>修改hadoop-env.sh<br>/# export JAVA_HOME=/usr/lib/jvm/java-6-sun<br>去掉#好 改成真实路径 JAVA_HOME=/opt/java/jdk1.8.0_172</p>
-<h2 id="开始-amp-结束"><a href="#开始-amp-结束" class="headerlink" title="开始&amp;结束"></a>开始&amp;结束</h2><p>第一次先格式化<br>bin/hadoop namenode -format</p>
-<p>./bin/start-all.sh<br>./bin/stop-all.sh</p>
-<p>web监视界面<br><a href="http://192.168.0.201:50030" target="_blank" rel="noopener">http://192.168.0.201:50030</a><br><a href="http://192.168.0.201:50070" target="_blank" rel="noopener">http://192.168.0.201:50070</a></p>
-
-          
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-      
-    
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/06/24/UML图/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="zlksilence">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/uploads/headpiture.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="silence">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                
-                <a href="/2019/06/24/UML图/" class="post-title-link" itemprop="url">UML图</a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-
-          
-          
-          
-
-          
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-
-              
-                
-              
-
-              <time title="创建时间：2019-06-24 16:18:55" itemprop="dateCreated datePublished" datetime="2019-06-24T16:18:55+08:00">2019-06-24</time>
-            </span>
-          
-
-          
-            
-
-            
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">更新于</span>
-                
-                <time title="修改时间：2019-07-20 15:25:48" itemprop="dateModified" datetime="2019-07-20T15:25:48+08:00">2019-07-20</time>
-              </span>
-            
-          
-
-          
-
-          
-            
-            
-          
-
-          
-          
-
-          
-
-          <br>
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>##UML</p>
-<p><img src="/imag/class/lei.png" alt></p>
-<p>可见性  名称:类型 [ = 默认值 ] </p>
-<p>可见性  名称(参数列表) [ : 返回类型] </p>
-<p>private,public 和protected,在类图中分别用符号-、+和#表示 </p>
-<h2 id="泛化关系-即继承"><a href="#泛化关系-即继承" class="headerlink" title="泛化关系 即继承"></a>泛化关系 即继承</h2><p><img src="/imag/class/jicheng.png" alt="jicheng"></p>
-<h2 id="实现关系"><a href="#实现关系" class="headerlink" title="实现关系"></a>实现关系</h2><p><img src="/imag/class/shixian.png" alt="shixian"></p>
-<h2 id="依赖关系-（返回类型、形参、局部变量都可构成依赖）"><a href="#依赖关系-（返回类型、形参、局部变量都可构成依赖）" class="headerlink" title="依赖关系  （返回类型、形参、局部变量都可构成依赖）"></a>依赖关系  （返回类型、形参、局部变量都可构成依赖）</h2><p><img src="/imag/class/yilai.png" alt="yilai"></p>
-<h2 id="关联-即拥有关系"><a href="#关联-即拥有关系" class="headerlink" title="关联 即拥有关系"></a>关联 即拥有关系</h2><p><img src="/imag/class/guanlian.png" alt="guanlian"></p>
-<h2 id="聚合-关联关系的一种-强关联关系"><a href="#聚合-关联关系的一种-强关联关系" class="headerlink" title="聚合   关联关系的一种 强关联关系"></a>聚合   关联关系的一种 强关联关系</h2><p><img src="/imag/class/juihe.png" alt="juihe"></p>
-<h2 id="组合"><a href="#组合" class="headerlink" title="组合"></a>组合</h2><p><img src="/imag/class/zuhe.png" alt="zuhe"></p>
-<h2 id="完整类图"><a href="#完整类图" class="headerlink" title="完整类图"></a>完整类图</h2><p><img src="/imag/class/wanzheng.png" alt="wanzheng"></p>
-
-          
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-      
-    
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/06/24/操作系统知识点/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -768,306 +427,6 @@
 <p>​    主要是避免的数据的重复传输拷贝，主要用于网络传输中。两种方式实现：内存映射和操作系统提供的senfile系统调用方法。</p>
 </li>
 </ul>
-
-          
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-      
-    
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/06/24/Assignment 3 Steganography/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="zlksilence">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/uploads/headpiture.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="silence">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                
-                <a href="/2019/06/24/Assignment 3 Steganography/" class="post-title-link" itemprop="url">Assignment 3 Steganography</a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-
-          
-          
-          
-
-          
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-
-              
-                
-              
-
-              <time title="创建时间：2019-06-24 16:18:55" itemprop="dateCreated datePublished" datetime="2019-06-24T16:18:55+08:00">2019-06-24</time>
-            </span>
-          
-
-          
-            
-
-            
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">更新于</span>
-                
-                <time title="修改时间：2019-07-09 21:21:34" itemprop="dateModified" datetime="2019-07-09T21:21:34+08:00">2019-07-09</time>
-              </span>
-            
-          
-
-          
-
-          
-            
-            
-          
-
-          
-          
-
-          
-
-          <br>
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h1><p><a href="https://en.wikipedia.org/wiki/Steganography" target="_blank" rel="noopener">Steganography</a> refers to hiding information such as text/images/data within another file/message/data with the intent of concealing the existence of the hidden information. A common method for this is hiding data within the least significant bits of the bytes representing colours in an image. The LSB can be represented as 0b00000001, 0x01 or 1 and the MSB can be represented as 0b10000000, 0x80 or 128.</p>
-<p>You are to write a program that can be used to hide data from a supplied file in the low bits of a supplied image file. The same program will also be able to check the size of hidden data, extract the data and verify, using a checksum, the integrity of the hidden data in an image.</p>
-<h1 id="Encoding"><a href="#Encoding" class="headerlink" title="Encoding"></a>Encoding</h1><p><img src="https://static.edusercontent.com/files/umhGWvrf2BLnbt07JkWexXQv" alt="img"></p>
-<p>Bitmap files (<code>*.bmp</code>) are a relatively simple file format. The file consists of a header containing metadata about the pixel format and image size and is <code>m</code> bytes long. The pixel data follows in the remaining <code>l</code> bytes, the size of which can be calculated from the information in the header. The basic specification only requires you handle these files and a <code>bitmap</code> module is supplied to assist in getting the length of the header in bytes and the length of the pixel data in bytes.</p>
-<p><img src="https://static.edusercontent.com/files/MzqCKX0tcwNytFX6U81xDaIs" alt="img"></p>
-<p>The program shall only modify the data relating to pixel bytes and shall copy the header information required for the image file format without modification. Concealing a single byte within the pixel data is depicted in the above diagram. The MSB of concealed data shall be placed in lower index pixel bytes and the LSB in higher index pixel bytes. Where multiple bits are concealed per byte of pixel data (as in a following diagram) the more significant bits of concealed data shall be placed in more significant bits of the pixel byte. Where there are insufficient bits of the current byte of concealed data to fill the required number of bits in the pixel byte the most significant bit(s) of the next byte of concealed data shall be utilised.</p>
-<p>The format of the concealed data consists of a 32 bit unsigned integer giving the length of the data payload, the data payload and a 32 bit unsigned integer checksum of the data payload. The data length and checksum parameters are always encoded as 1 concealed bit per byte of pixel data. The concealed data is encoded as the minimum number of concealed bits per byte of pixel data to completely encode the payload. This may require 2, 3 or even 8 bits concealed per byte of pixel data. Where multiple bits are required per byte more significant bits of concealed data are encoded in the more significant bits of the pixel data as shown in a following diagram where concealing 3 bits per byte of pixel data is depicted. Once all the bytes of the data payload have been concealed remaining bits in the current pixel byte shall be set to 0 and remaining pixel bytes (until the last 32 bytes for the checksum) shall be copied unmodified.</p>
-<p><img src="https://static.edusercontent.com/files/G2ZRyBfgTu3fVIwAWPVJNgSJ" alt="img"></p>
-<p>Given <code>o</code> bytes of data to conceal the <em>output</em> image file that has <code>l</code> bytes of pixel data shall have:</p>
-<ol>
-<li><code>m</code> bytes of header data directly copied from the <em>input</em> source image file. </li>
-<li>32 bytes of pixel data with the length of the data payload <code>o</code> concealed 1 bit per byte.</li>
-<li><code>p</code> bytes of modified pixel data<ol>
-<li><code>r</code> bits of concealed data per pixel byte shall be used where,</li>
-<li>r is the minimum number of bits per pixel such that the concealed data can fit within the available pixel values.</li>
-<li>r is an integer value such that the following is true <code>(r - 1) * (l - 64) &lt; (o * 8) &amp;&amp; r * (l - 64) &gt;= (o * 8)</code></li>
-<li>If (<code>r * p) != (o * 8)</code> the ‘concealed’ bits will be append with <code>s</code> ‘0’ bits such that <code>(r * p) == (s + o * 8)</code>.</li>
-</ol>
-</li>
-<li><code>q</code> bytes of unmodified pixel data.</li>
-<li>32 bytes of pixel data with the checksum of the data payload concealed 1 bit per byte.</li>
-</ol>
-<p><img src="https://static.edusercontent.com/files/nptFahhlPgsye67hOWnm7XXO" alt="img"></p>
-<p>Once all the concealed data is encoded the remaining bytes are copied unmodified until the checksum. If at the end of the concealed data there are insufficient bits to fill the last pixel byte (as in the above diagram) the remaining bits shall be set to 0.</p>
-<h1 id="Basic-Specification-75"><a href="#Basic-Specification-75" class="headerlink" title="Basic Specification (75%)"></a>Basic Specification (75%)</h1><p>The program shall comply with the following specification:</p>
-<h2 id="1-Compilation-amp-Code"><a href="#1-Compilation-amp-Code" class="headerlink" title="1. Compilation &amp; Code"></a>1. Compilation &amp; Code</h2><ol>
-<li>The program shall be written in C and compiled with GCC using the C11 standard; the compiled executable shall be named <code>steg</code>. Compilation flags shall include “<code>-Wall -Wextra -Wpedantic -fsanitize=address -std=c11</code>“. Additional flags that do not remove/undo the effects of these flags shall be permitted.</li>
-<li>Compilation shall be through a <code>Makefile</code> that has <code>steg</code> and <code>clean</code> as targets.</li>
-<li>All comments in the source code shall be written in English.</li>
-</ol>
-<h2 id="2-Error-Handling"><a href="#2-Error-Handling" class="headerlink" title="2. Error Handling"></a>2. Error Handling</h2><ol>
-<li>All error messages, which are messages starting with “Error:”, shall be printed to the terminal using <code>stderr</code>.</li>
-<li>Where the specification states “exit immediately with error code n” this is to mean no further text shall be printed to the terminal and the return statement in <code>main</code> shall return <code>n</code>. All allocated memory shall be properly freed.</li>
-<li>Errors shall be responded to in the following order:<ol>
-<li>Left to right for command line options.</li>
-<li>Missing input files before existing output files.</li>
-<li>Payload size relative to image size.</li>
-<li>Checksum verification.</li>
-</ol>
-</li>
-<li>If no errors occur the program shall return an error code of 0.</li>
-</ol>
-<h2 id="3-Command-Line-Options"><a href="#3-Command-Line-Options" class="headerlink" title="3. Command Line Options"></a>3. Command Line Options</h2><ol>
-<li><p>The program will accept 1, 2 or 3 non-option arguments (arguments after and including the first argument that doesn’t start with <code>-</code>). The following points specify the differing behaviour of the program with each number of arguments.</p>
-</li>
-<li><p>Optional arguments may modify the behaviour of the program and shall be given before any non-option arguments.</p>
-</li>
-<li><p>If the program is given zero non-option arguments it shall print <code>Error: No file name provided.\n</code> and exit immediately with error code 7.</p>
-</li>
-<li><p>If the program is given more than three non-option arguments it shall print <code>Error: Too many file names provided.\n</code> and exit immediately with error code 6.</p>
-</li>
-<li><p>If the program is given three non-option arguments it shall treat the first non-option argument as the name of an <em>input</em> source image file, the second non-option argument as the name of an <em>input</em> source data file and the third non-option argument as the name of an <em>output</em> destination image file. It shall then embed the contents of the input source data file in the input source image pixels and output to the destination image file the modified pixel values and unmodified file format/header information.</p>
-</li>
-<li><p>If the program is given two non-option arguments it shall treat the first non-option argument as an <em>input</em> image file with encoded data and the second non-option argument as an <em>output</em> data file. It shall then extract the contents of the input image file to the output data file.</p>
-</li>
-<li><p>If the program is given one non-option argument it shall treat it as an <em>input</em> image file with encoded data and only decode if another option is specified.</p>
-</li>
-<li><p>The program shall accept the optional argument <code>-h</code> which shall cause the program to print the specified help message and immediately exit with error code 1. The help message is:</p>
-<p>Text</p>
-</li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">Usage: steg [-vncp] source_image [[data_file] [output_image]]</span><br><span class="line"></span><br><span class="line">Steganographically conceal/extract data from an image.</span><br><span class="line"> </span><br><span class="line">With three arguments will conceal data from data_file within source_image and</span><br><span class="line"> </span><br><span class="line">output to output_image. One and two argument versions inspect (and optionally save)</span><br><span class="line"> </span><br><span class="line">data from an image with concealed data.</span><br><span class="line"></span><br><span class="line">  -c  Print the checksum of the concealed data.</span><br><span class="line"> </span><br><span class="line">  -h  Print this help message.</span><br><span class="line"> </span><br><span class="line">  -n  Print the number of concealed bytes.</span><br><span class="line"></span><br><span class="line">  -p  Print the contents of a concealed image/data file when concealing. Assuming text data.</span><br><span class="line"> </span><br><span class="line">  -v  Verify checksum of an image with concealed data. Invalid if an output image is specified.</span><br></pre></td></tr></table></figure>
-
-
-
-<ol start="9">
-<li><p>The program shall accept the optional argument <code>-n</code> which shall cause the program to print the length of hidden data in bytes, in the format <code>Hidden data length: 45643 bytes.\n</code>.</p>
-</li>
-<li><p>The program shall accept the optional argument <code>-c</code> which shall cause the program to print the checksum of the hidden data as a 32-bit hex number in the format <code>Checksum: 0x0400F50F.\n</code>. When the <em>input</em> image contains hidden data, as signified by a command line containing 1 or 2 non-option arguments, this checksum value shall be read from the stored checksum. When creating an <em>output</em> image containing hidden data the checksum value printed shall be checksum calculated from the <em>input</em> data.</p>
-</li>
-<li><p>The program shall accept the option argument <code>-p</code> which shall cause the program to print the hidden data (treating it as a text file/string) between two lines that each consist of 80 hyphens:</p>
-</li>
-</ol>
-<pre><code>Text
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">--------------------------------------------------------------------------------</span><br><span class="line">This is the contents of a text file. The first line was very long and did not end at 80 characters.</span><br><span class="line"></span><br><span class="line">This file ended with a new line character and means there is a blank line before the hyphens.</span><br><span class="line"></span><br><span class="line">--------------------------------------------------------------------------------</span><br></pre></td></tr></table></figure></code></pre><ol start="12">
-<li><p>The program shall accept the optional argument <code>-v</code> which shall cause the program to verify the checksum with the data. The <code>-v</code> optional argument shall be valid only with one and two non-option argument invocations of the program. If the optional argument <code>-v</code>Iis used with the three non-option argument invocation of the program the program shall print <code>Error: -v invalid when concealing data.\n</code> and exit immediately with error code 11. If the calculated checksum differs from the stored checksum the program shall print <code>Error: Checksum mismatch.\n</code> and exit immediately with error code 12. If the calculated checksum matches the stored checksum the program shall print <code>Checksums match.\n</code>. </p>
-</li>
-<li><p>If the program finds an optional argument that it is not known it shall print <code>Error: Unknown option -%s.\n</code> and immediately exit with error code 8.</p>
-</li>
-<li><p>Output/effects from processing optional arguments shall occur after any output files have been written and will occur in the order <code>-p</code>, <code>-n</code>, <code>-c</code>, <code>-v</code>.</p>
-</li>
-</ol>
-<h2 id="4-File-Handling"><a href="#4-File-Handling" class="headerlink" title="4. File Handling"></a>4. File Handling</h2><ol>
-<li>If a nominated <em>input</em> file does not exist the program shall print an error message <code>Error: Input file %s was not found.\n</code> and exit immediately with error code 2. The token  <code>%s</code> shall be replaced with the name of the file that was nominated.</li>
-<li>If a nominated <em>output</em> file exists the program shall inquire of the user <code>Output file %s already exists. Overwrite (y/n)?</code>  If an affirmative answer (<code>y, yes</code> - case insensitive) is received, the program shall continue and overwrite the file. If the answer is negative (<code>n, no</code> - case insensitive) the program shall emit no further messages and exit immediately with error code 3. If any other value is received the program shall ask the question again.</li>
-<li>If the data to be encoded cannot fit within the source image pixel values (see encoding details above) the program shall print <code>Error: Input data too large to hide within source image.\n</code> and exit immediately with error code 5.</li>
-<li>If when attempting to decode an <em>input</em> image file the decoded data size is too large to be concealed within the image file the program shall print an error message <code>Error: Image file too small to conceal %i bytes of data.\n</code> and exit immediately with error code 9.</li>
-</ol>
-<h2 id="5-Checksum"><a href="#5-Checksum" class="headerlink" title="5. Checksum"></a>5. Checksum</h2><p>A <a href="https://en.wikipedia.org/wiki/Checksum" target="_blank" rel="noopener">checksum</a> is a method to check if data has been modified or changed. It is a function of the data and is generally sensitive to changes of a single bit. As we are storing data within an image we need a way to verify that it has not been corrupted in an image editing program. To this end we have devised a relatively simple checksum to use.</p>
-<ol>
-<li>The data payload shall be broken into 16-bit unsigned short integers using <a href="https://en.wikipedia.org/wiki/Endianness" target="_blank" rel="noopener">little endian</a> ordering.</li>
-<li>Each short shall be squared (multiplied by itself) and the result stored in an unsigned integer (32-bit).</li>
-<li>The result of the squaring operation shall be successively XOR’d (<code>^</code> operator) to get the final checksum.</li>
-<li>If the data payload has an odd number of bytes an additional zero byte shall be appended onto the end for the purposes of calculating the checksum but shall not be stored/concealed within the pixel bytes.</li>
-</ol>
-<h1 id="Code-Quality-25"><a href="#Code-Quality-25" class="headerlink" title="Code Quality (25%)"></a>Code Quality (25%)</h1><p>A quarter of your mark will be based on code quality. This includes consistent and clear formatting, sensible variable and function names (self-documenting), succinct, clear and appropriate comments as well as cohesive module design, correct usage of headers and control structures (switch, if-else if-else, while, for).</p>
-<h1 id="Extension-Bonus-10"><a href="#Extension-Bonus-10" class="headerlink" title="Extension (Bonus 10%)"></a>Extension (Bonus 10%)</h1><p>We are adding a <strong>difficult</strong> bonus extension to this project. It is not expected that many will be able to complete this but is posed as a challenge. Instead of handling only bitmaps your program shall also accept png image files. Png is another image format that has lossless compression. An open source library is available to assist with parsing and accessing the data (<code>libpng</code>). This extension will involve recognising the image format from the extension of the filename (png vs bmp). We won’t ask you to convert between formats (input image format will match the output format).</p>
-<p>No assistance will be provided in the use of <code>libpng</code> so that you will have to rely on reading the documentation which is available online at the libpng <a href="http://www.libpng.org/pub/png/libpng.html" target="_blank" rel="noopener">website</a>.</p>
-<h1 id="Constraints"><a href="#Constraints" class="headerlink" title="Constraints"></a>Constraints</h1><ol>
-<li>All images provided will be valid bitmaps and the supplied bitmap files <code>bitmap.h</code> and <code>bitmap.o</code> will be able to give the lengths of header and pixel data reliably.</li>
-<li>Although <code>getopt</code> can handle splitting <code>-pnc</code> to <code>-p -n -c</code> we will not be testing this. We will test:<ol>
-<li>Other optional arguments like <code>-x</code></li>
-<li>Too many/too few non-option arguments.</li>
-</ol>
-</li>
-</ol>
-<h1 id="Hints"><a href="#Hints" class="headerlink" title="Hints"></a>Hints</h1><ol>
-<li><p>Command line parsing without <code>getopt</code> will be difficult.</p>
-</li>
-<li><p>Encoding a single bit per byte is significantly easier than the general case.</p>
-</li>
-<li><p>Two bits per byte is still significantly easier than the general case as well.</p>
-</li>
-<li><p><code>fopen</code> has enhanced handling for cases when files exist in C11.</p>
-</li>
-<li><p>When creating your <code>Makefile</code> be careful not to delete the supplied <code>bitmap.o</code>. If you do another one copy can be obtained here.</p>
-<p><a href="https://static.edusercontent.com/files/hvsCDqP69yWYTvOp4snB7NeY" target="_blank" rel="noopener">bitmap.o</a></p>
-</li>
-<li><p>Be careful you encode/decode bits in the specified order. We are checking for exact matches in the encoded images.</p>
-</li>
-<li><p>You can manually inspect the contents (byte by byte) of files using the <code>xxd</code> program. For example, <code>xxd -l len -b filename</code> will display ‘len’ bytes of the file named ‘filename’, in binary format.</p>
-</li>
-</ol>
-<h1 id="Execution"><a href="#Execution" class="headerlink" title="Execution"></a>Execution</h1><ol>
-<li>Your submission must include a <code>Makefile</code> that you shall provide. You can use a previously supplied <code>Makefile</code> as a template and adapt it to this assignment or write your own less generic <code>Makefile</code> based on the lecture slides.</li>
-<li>The executable that is created shall be called <code>steg</code>. It shall be created in the root directory of your submission.</li>
-<li>Your code shall be compiled by executing the command <code>make clean &amp;&amp; make</code> in the root directory of your submission. This shall delete all intermediate object files (except <code>bitmap.o</code>) and build the <code>steg</code> program.</li>
-</ol>
-<h1 id="Libraries"><a href="#Libraries" class="headerlink" title="Libraries"></a>Libraries</h1><p>You may use any function in the C11 standard library. You additionally may use the <code>getopt</code> function from the GNU C Library (found in header <code>getopt.h</code>). We also supply files  <code>bitmap.o</code> and <code>bitmap.h</code> that enable parsing of bitmaps to get the length of the bitmap header and size of pixel data. If attempting the png extension you may additionally utilise <code>libpng</code> which is already available within edstem.</p>
-<p>The following library functions are likely to be useful:</p>
-<p>Header <strong>&lt;stdio.h&gt;</strong> has file input/output functions: <strong>fread(), fwrite(), fopen(), fseek(), fclose()</strong><br>Header <strong>&lt;getopt.h&gt;</strong> has argument parsing function: <strong>getopt()</strong><br>Header <strong>&lt;assert.h&gt;</strong> has the bug-catching macro: <strong>assert()</strong></p>
-<h1 id="Expectations"><a href="#Expectations" class="headerlink" title="Expectations"></a>Expectations</h1><ul>
-<li>This is an individual assignment, not group work. Although you can consult others about the use of specific functions, the code that you submit must be solely your own work: The result of your thought processes, design decisions, implementation and testing.</li>
-<li>We expect you to follow good design practices, including the use of functions to reduce complexity and code repetition.</li>
-<li>You will make completing the assignment significantly easier if you start work on it early and adopt an incremental approach to implementation and testing. In other words, <ul>
-<li>Do not code the entire program and then submit it for testing. Instead, code a small subsection and test it, then incrementally extend this subsection and re-test.</li>
-<li>Do not submit your first code at 10pm on the night that the assignment is due and expect everything to work…</li>
-</ul>
-</li>
-<li>Avoid submitting just before it is due - clock synchronisation or build times may shift your final submission to microseconds after the cutoff 11:59:00PM and result in late penalties.</li>
-<li>Elements of the project are intended to be challenging. The extension in particular is designed to challenge the most skilled amongst you.</li>
-</ul>
-<h1 id="Academic-Honesty"><a href="#Academic-Honesty" class="headerlink" title="Academic Honesty"></a>Academic Honesty</h1><p>While the University is aware that the vast majority of students and staff act ethically and honestly, it is opposed to and will not tolerate academic dishonesty or plagiarism and will treat all allegations of dishonesty seriously.</p>
-<p>Further information on academic honesty, academic dishonesty, and the resources available to all students can be found on the academic integrity pages on the current students website:</p>
-<p><a href="https://sydney.edu.au/students/academic-integrity.html" target="_blank" rel="noopener">https://sydney.edu.au/students/academic-integrity.html</a>. </p>
 
           
         
@@ -1310,6 +669,541 @@
 </li>
 </ul>
 <h2 id="JDK-命令行工具"><a href="#JDK-命令行工具" class="headerlink" title="JDK 命令行工具"></a>JDK 命令行工具</h2><h3 id="jps：虚拟机进程状况工具"><a href="#jps：虚拟机进程状况工具" class="headerlink" title="jps：虚拟机进程状况工具"></a>jps：虚拟机进程状况工具</h3><pre><code>jps -l</code></pre><h3 id="jstat：虚拟机统计信息监视工具"><a href="#jstat：虚拟机统计信息监视工具" class="headerlink" title="jstat：虚拟机统计信息监视工具"></a>jstat：虚拟机统计信息监视工具</h3><pre><code>jstat -gc 2764 250 20</code></pre><h3 id="jinfo：Java-配置信息工具"><a href="#jinfo：Java-配置信息工具" class="headerlink" title="jinfo：Java 配置信息工具"></a>jinfo：Java 配置信息工具</h3><h3 id="jmap：Java内存映射工具"><a href="#jmap：Java内存映射工具" class="headerlink" title="jmap：Java内存映射工具"></a>jmap：Java内存映射工具</h3><h3 id="jhat：虚拟机堆转储快照分析工具"><a href="#jhat：虚拟机堆转储快照分析工具" class="headerlink" title="jhat：虚拟机堆转储快照分析工具"></a>jhat：虚拟机堆转储快照分析工具</h3><h3 id="jstack：Java堆栈跟踪工具"><a href="#jstack：Java堆栈跟踪工具" class="headerlink" title="jstack：Java堆栈跟踪工具"></a>jstack：Java堆栈跟踪工具</h3>
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/06/24/Java/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="zlksilence">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/uploads/headpiture.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="silence">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2019/06/24/Java/" class="post-title-link" itemprop="url">Java  笔记</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+
+          
+          
+          
+
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-06-24 16:18:55" itemprop="dateCreated datePublished" datetime="2019-06-24T16:18:55+08:00">2019-06-24</time>
+            </span>
+          
+
+          
+            
+
+            
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-07-09 21:39:14" itemprop="dateModified" datetime="2019-07-09T21:39:14+08:00">2019-07-09</time>
+              </span>
+            
+          
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          <br>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>##基本类型</p>
+<p>###Integer<br>    Max 0x7fffffff<br>    Min 0x80000000<br>    最大转化的进制可能的字符：<br>    final static char[] digits = {<br>        ‘0’ , ‘1’ , ‘2’ , ‘3’ , ‘4’ , ‘5’ ,<br>        ‘6’ , ‘7’ , ‘8’ , ‘9’ , ‘a’ , ‘b’ ,<br>        ‘c’ , ‘d’ , ‘e’ , ‘f’ , ‘g’ , ‘h’ ,<br>        ‘i’ , ‘j’ , ‘k’ , ‘l’ , ‘m’ , ‘n’ ,<br>        ‘o’ , ‘p’ , ‘q’ , ‘r’ , ‘s’ , ‘t’ ,<br>        ‘u’ , ‘v’ , ‘w’ , ‘x’ , ‘y’ , ‘z’<br>    };<br>    方法：包含进制转换<br>    int 类型转无符号：用long扩展表示int的无符号数 ((long) x) &amp; 0xffffffffL;<br>-<strong>java中有三种移位运算符</strong></p>
+<p>&lt;&lt; : 左移运算符，num &lt;&lt; 1,相当于num乘以2</p>
+<p>&gt;&gt; :   右移运算符，num &gt;&gt; 1,相当于num除以2</p>
+<p>&gt;&gt;&gt;    :     无符号右移，忽略符号位，空位都以0补齐</p>
+<p>**int numberOfLeadingZeros(int i): 得到从左边起多少个零 源码：<br>// HD, Figure 5-6<br>        if (i == 0)<br>            return 32;<br>        int n = 1;<br>        if (i &gt;&gt;&gt; 16 == 0) { n += 16; i &lt;&lt;= 16; }<br>        if (i &gt;&gt;&gt; 24 == 0) { n +=  8; i &lt;&lt;=  8; }<br>        if (i &gt;&gt;&gt; 28 == 0) { n +=  4; i &lt;&lt;=  4; }<br>        if (i &gt;&gt;&gt; 30 == 0) { n +=  2; i &lt;&lt;=  2; }<br>        n -= i &gt;&gt;&gt; 31;<br>        return n;<br>来自《Hacker’s Delight》这本书</p>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/06/24/Redis 笔记/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="zlksilence">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/uploads/headpiture.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="silence">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2019/06/24/Redis 笔记/" class="post-title-link" itemprop="url">Redis 笔记----《Redis设计与实现》</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+
+          
+          
+          
+
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-06-24 16:18:55" itemprop="dateCreated datePublished" datetime="2019-06-24T16:18:55+08:00">2019-06-24</time>
+            </span>
+          
+
+          
+            
+
+            
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-07-09 21:40:58" itemprop="dateModified" datetime="2019-07-09T21:40:58+08:00">2019-07-09</time>
+              </span>
+            
+          
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          <br>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>​    </p>
+<h2 id="基本数据结构"><a href="#基本数据结构" class="headerlink" title="基本数据结构"></a>基本数据结构</h2><ul>
+<li><p>SDS</p>
+<ul>
+<li>动态字符串</li>
+<li><img src="C:%5CUsers%5Czlk%5CAppData%5CLocal%5CTemp%5C1557408076819.png" alt="1557408076819"></li>
+</ul>
+</li>
+<li><p>链表</p>
+</li>
+<li><p>字典</p>
+<ul>
+<li><img src="C:%5CUsers%5Czlk%5CAppData%5CLocal%5CTemp%5C1557408278904.png" alt="1557408278904"></li>
+<li>ht[1]是在rehash时使用</li>
+</ul>
+</li>
+<li><p>SkipList跳表</p>
+<ul>
+<li><img src="C:%5CUsers%5Czlk%5CAppData%5CLocal%5CTemp%5C1557408331278.png" alt="1557408331278"></li>
+</ul>
+</li>
+<li><p>整数集合</p>
+<ul>
+<li><img src="C:%5CUsers%5Czlk%5CAppData%5CLocal%5CTemp%5C1557408357317.png" alt="1557408357317"></li>
+<li>可自动升级，不可降级</li>
+</ul>
+</li>
+<li><p>压缩列表</p>
+</li>
+<li><p>对象</p>
+<ul>
+<li>引用计数内存回收</li>
+<li>对象共享<h2 id="持久化"><a href="#持久化" class="headerlink" title="持久化"></a>持久化</h2></li>
+</ul>
+</li>
+<li><p>RDB 持久化内存中的键值对</p>
+</li>
+<li><p>AOF（Append Only File） 记录操作命令</p>
+<h2 id="复制与集群"><a href="#复制与集群" class="headerlink" title="复制与集群"></a>复制与集群</h2></li>
+<li><p>复制 </p>
+<p>主从复制</p>
+</li>
+<li><p>集群</p>
+<p>一致性哈希 ，分配16384曹，客户端 key-value 命令 根据key (CRC-16 &amp; 16383) 找到所负责槽的节点执行。</p>
+<h2 id="独立功能"><a href="#独立功能" class="headerlink" title="独立功能"></a>独立功能</h2></li>
+<li><p>发布订阅</p>
+</li>
+<li><p>事物</p>
+</li>
+<li><p>Lua Script</p>
+</li>
+<li><p>排序</p>
+</li>
+<li><p>二进制位数组</p>
+</li>
+<li><p>慢查询日志</p>
+</li>
+<li><p>监视器</p>
+</li>
+</ul>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/06/24/linux 常用命令/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="zlksilence">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/uploads/headpiture.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="silence">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2019/06/24/linux 常用命令/" class="post-title-link" itemprop="url">linux 常用命令</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+
+          
+          
+          
+
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-06-24 16:18:55" itemprop="dateCreated datePublished" datetime="2019-06-24T16:18:55+08:00">2019-06-24</time>
+            </span>
+          
+
+          
+            
+
+            
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-07-09 21:42:08" itemprop="dateModified" datetime="2019-07-09T21:42:08+08:00">2019-07-09</time>
+              </span>
+            
+          
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          <br>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>以此记录学习中遇到过linux命令及用法，相关操作都能在网上或书上找到。记录只是为了熟悉操作</p>
+<h2 id="scp-：ssh传输文件"><a href="#scp-：ssh传输文件" class="headerlink" title="scp ：ssh传输文件"></a>scp ：ssh传输文件</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">downlode from server</span></span><br><span class="line">scp username@servername:/path/filename tmp.local_destination</span><br><span class="line"><span class="meta">#</span><span class="bash">uplode to server</span></span><br><span class="line">scp /path/local_filename username@servername:/path</span><br><span class="line"><span class="meta">#</span><span class="bash">filefold</span></span><br><span class="line">scp -r ~</span><br><span class="line"><span class="meta">#</span><span class="bash">username@servername can be host name</span></span><br></pre></td></tr></table></figure>
+
+<p>###参开文献</p>
+
           
         
       
@@ -1770,7 +1664,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2019-07-20 15:18:10" itemprop="dateModified" datetime="2019-07-20T15:18:10+08:00">2019-07-20</time>
+                <time title="修改时间：2019-08-05 14:59:56" itemprop="dateModified" datetime="2019-08-05T14:59:56+08:00">2019-08-05</time>
               </span>
             
           
@@ -1846,7 +1740,7 @@
 <p><img src="/imag/java/5621908-77efbdbf6c79fac9.webp" alt></p>
 <p>###TreeMap</p>
 <p>实现由 SortMap接口，红黑树的java实现版</p>
-<h2 id="List"><a href="#List" class="headerlink" title="List"></a>List</h2><h3 id="List-1"><a href="#List-1" class="headerlink" title="List"></a>List</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">List</span>&lt;<span class="title">E</span>&gt; <span class="keyword">extends</span> <span class="title">Collection</span>&lt;<span class="title">E</span>&gt; </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">size</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">isEmpty</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">contains</span><span class="params">(Object o)</span></span>;</span><br><span class="line">    <span class="function">Iterator&lt;E&gt; <span class="title">iterator</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">add</span><span class="params">(E e)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">remove</span><span class="params">(Object o)</span></span>;</span><br><span class="line">    <span class="function">E <span class="title">get</span><span class="params">(<span class="keyword">int</span> index)</span></span>;</span><br><span class="line">    <span class="function">E <span class="title">set</span><span class="params">(<span class="keyword">int</span> index, E element)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">indexOf</span><span class="params">(Object o)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">lastIndexOf</span><span class="params">(Object o)</span></span>;</span><br><span class="line">    <span class="function">ListIterator&lt;E&gt; <span class="title">listIterator</span><span class="params">()</span></span>;</span><br><span class="line">  	<span class="function"><span class="keyword">boolean</span> <span class="title">containsAll</span><span class="params">(Collection&lt;?&gt; c)</span></span>;</span><br><span class="line"> 	<span class="function"><span class="keyword">default</span> <span class="keyword">void</span> <span class="title">sort</span><span class="params">(Comparator&lt;? <span class="keyword">super</span> E&gt; c)</span> </span>&#123;</span><br><span class="line">		...</span><br><span class="line">    &#125;</span><br><span class="line">	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="Collections"><a href="#Collections" class="headerlink" title="Collections"></a>Collections</h2><h3 id="List"><a href="#List" class="headerlink" title="List"></a>List</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">List</span>&lt;<span class="title">E</span>&gt; <span class="keyword">extends</span> <span class="title">Collection</span>&lt;<span class="title">E</span>&gt; </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">size</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">isEmpty</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">contains</span><span class="params">(Object o)</span></span>;</span><br><span class="line">    <span class="function">Iterator&lt;E&gt; <span class="title">iterator</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">add</span><span class="params">(E e)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">remove</span><span class="params">(Object o)</span></span>;</span><br><span class="line">    <span class="function">E <span class="title">get</span><span class="params">(<span class="keyword">int</span> index)</span></span>;</span><br><span class="line">    <span class="function">E <span class="title">set</span><span class="params">(<span class="keyword">int</span> index, E element)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">indexOf</span><span class="params">(Object o)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">lastIndexOf</span><span class="params">(Object o)</span></span>;</span><br><span class="line">    <span class="function">ListIterator&lt;E&gt; <span class="title">listIterator</span><span class="params">()</span></span>;</span><br><span class="line">  	<span class="function"><span class="keyword">boolean</span> <span class="title">containsAll</span><span class="params">(Collection&lt;?&gt; c)</span></span>;</span><br><span class="line"> 	<span class="function"><span class="keyword">default</span> <span class="keyword">void</span> <span class="title">sort</span><span class="params">(Comparator&lt;? <span class="keyword">super</span> E&gt; c)</span> </span>&#123;</span><br><span class="line">		...</span><br><span class="line">    &#125;</span><br><span class="line">	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <h3 id="ArrayList"><a href="#ArrayList" class="headerlink" title="ArrayList"></a>ArrayList</h3><p>​    底层数组实现，大小自动扩容 1.5倍 不可修改</p>
 <p>LinkedList<br>    双向链表实现 增加方法：</p>
@@ -1855,7 +1749,50 @@
 <h3 id="CopyOnWriteArrayList"><a href="#CopyOnWriteArrayList" class="headerlink" title="CopyOnWriteArrayList"></a>CopyOnWriteArrayList</h3><p>​    线程安全；</p>
 <p>​    CopyOnWrite： 写时复制，计算机中对内存的修改并不再原来的内存块中直接修改，而是将内存拷贝一份，在新内存处修改，而后将原内存指针指向新的内存。linux下 父进程创建子进程，子进程开始和父进程共享内存数据，当子进程要修改时子进程才复制一份父进程的数据。</p>
 <p>​    此处 CopyOnWriteArrayList，写时复制，加锁。读不加锁。</p>
-<h3 id="LinkedList"><a href="#LinkedList" class="headerlink" title="LinkedList"></a>LinkedList</h3><h2 id="Stack"><a href="#Stack" class="headerlink" title="Stack"></a>Stack</h2><h2 id="Deque-ArrayDeque-LinkedList"><a href="#Deque-ArrayDeque-LinkedList" class="headerlink" title="Deque ArrayDeque LinkedList"></a>Deque ArrayDeque LinkedList</h2><h2 id="Map-List-Set-Queue"><a href="#Map-List-Set-Queue" class="headerlink" title="Map List Set Queue"></a>Map List Set Queue</h2><p><img src="/imag/java/20141217105653250.jpg" alt></p>
+<h3 id="LinkedBlockingQueue"><a href="#LinkedBlockingQueue" class="headerlink" title="LinkedBlockingQueue"></a>LinkedBlockingQueue</h3><p>​    无界缓存队列，线程安全的阻塞队列，底层由链表实现的可选有界队列，先进先出。不指定大小的话，默认Interger.MAX_VALUE。</p>
+<p>​    常见方法：</p>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>功能说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>add()</td>
+<td>队列已满,，则报异常IIIegaISlabEepeplian</td>
+</tr>
+<tr>
+<td>remove()</td>
+<td>队列为空，则报异常NoSuchElementException</td>
+</tr>
+<tr>
+<td>offer()</td>
+<td>添加一元素，满则返回true，其他false</td>
+</tr>
+<tr>
+<td>put()</td>
+<td>添加一个元素，队列满，则阻塞</td>
+</tr>
+<tr>
+<td>take()</td>
+<td>取一个元素，队列空，则则塞</td>
+</tr>
+<tr>
+<td>peek</td>
+<td>返回对头元素，为空则返回null</td>
+</tr>
+<tr>
+<td>poll</td>
+<td>移除队头并返回队元素，空则返回null</td>
+</tr>
+</tbody></table>
+<p>​    实现：</p>
+<p>​    计数使用AtomicInteger。头尾<strong>各使用了一个ReentrantLock锁</strong>，用于添加或删除数据。等待添加或删除的阻塞使用了两个Condition用于通知消费者和生产者；</p>
+<h3 id="ArrayBlockingQueue"><a href="#ArrayBlockingQueue" class="headerlink" title="ArrayBlockingQueue"></a>ArrayBlockingQueue</h3><p>​    有界缓存队列，同上，不过底层是基于数组实现的循环队列。锁<strong>只使用了一个ReentrantLock。</strong></p>
+<h3 id="SynchronousQueue"><a href="#SynchronousQueue" class="headerlink" title="SynchronousQueue"></a>SynchronousQueue</h3><p>​    无缓冲队列，有消费者生产者才不会被阻塞，本身队列不存储任何元素，生产者的东西直接给消费者。</p>
+<h3 id="PriorityBlockingQueue"><a href="#PriorityBlockingQueue" class="headerlink" title="PriorityBlockingQueue"></a>PriorityBlockingQueue</h3><p>​    优先级队列PriorityBlockingQueue必须是实现Comparable接口，队列通过这个接口的compare方法确定对象的priority。当前和其他对象比较，如果compare方法返回负数，那么在队列里面的优先级就比较高。实现是一个基于堆的无界并发安全的优先级队列。</p>
+<h3 id="DelayQueue"><a href="#DelayQueue" class="headerlink" title="DelayQueue"></a>DelayQueue</h3><h2 id="Map-List-Set-Queue"><a href="#Map-List-Set-Queue" class="headerlink" title="Map List Set Queue"></a>Map List Set Queue</h2><p><img src="/imag/java/20141217105653250.jpg" alt></p>
 <p><img src="/imag/java/20141217105713046.jpg" alt></p>
 <h2 id="HashCode"><a href="#HashCode" class="headerlink" title="HashCode"></a>HashCode</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">如何写HashCode</span><br><span class="line">HashMap底层对象Hash只是对对象的存储地址做Hash。有时我们需要自己写HashCode和Equals（两者一般一起重写），参考写法：</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">hashCode</span><span class="params">()</span> </span>&#123;</span><br><span class="line"> <span class="comment">// 初始值为一个非零数</span></span><br><span class="line">    <span class="keyword">int</span> result = <span class="number">17</span>;</span><br><span class="line">	</span><br><span class="line">    <span class="comment">// 为每个成员变量计算值</span></span><br><span class="line">    result = <span class="number">31</span> * result + (booleanField ? <span class="number">1</span> : <span class="number">0</span>);</span><br><span class="line">    result = <span class="number">31</span> * result + byteField;</span><br><span class="line">    result = <span class="number">31</span> * result + charField;</span><br><span class="line">    result = <span class="number">31</span> * result + shortField;</span><br><span class="line">    result = <span class="number">31</span> * result + intField;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">equals</span><span class="params">(Object o)</span> </span>&#123;</span><br><span class="line">      <span class="comment">// 1 相当于hashcode相等，具有相同的散列数</span></span><br><span class="line">      <span class="keyword">if</span> (<span class="keyword">this</span> == o) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">      &#125;</span><br><span class="line">     <span class="comment">// 2 如果另一个对象不是当着的class类型，那必然是不相等的</span></span><br><span class="line">      <span class="keyword">if</span> (!(o <span class="keyword">instanceof</span> MyType)) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">     <span class="comment">// 3 判断对象的私有成员是否相等。</span></span><br><span class="line">     MyType lhs = (MyType) o;</span><br><span class="line">     <span class="keyword">return</span> primitiveField == lhs.primitiveField &amp;&amp;</span><br><span class="line">            referenceField.equals(lhs.referenceField) &amp;&amp;</span><br><span class="line">            (nullableField == <span class="keyword">null</span> ? lhs.nullableField == <span class="keyword">null</span></span><br><span class="line">                                  : nullableField.equals(lhs.nullableField));   &#125;</span><br></pre></td></tr></table></figure>
 
